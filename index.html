@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="format-detection" content="telephone=no">
+<title>射形チェック｜アーチェリー・フォーム診断</title>
+<style>
+:root{
+  /* accent is the ONLY brand hue; warn/danger are semantic states only */
+  --accent:#2754C5;
+  --accent-press:#1F459F;
+  --accent-ink:#2148AE;
+  --accent-soft:#EDF2FD;
+  --accent-soft-2:#D6E1F8;
+  --accent-ring:rgba(39,84,197,.22);
+
+  --bg:#F5F6F8;
+  --surface:#FFFFFF;
+  --surface-2:#F1F3F6;
+  --line:#E7E9EE;
+  --line-strong:#D6DAE1;
+
+  --ink-1:#15171B;
+  --ink-2:#555B66;
+  --ink-3:#6B717C;
+  --ink-4:#A3A8B1;
+
+  --danger:#B42318;
+  --danger-soft:#FCEDEB;
+  --warn:#8A5A00;
+  --warn-soft:#FFF5DB;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-8:32px;
+  --r-xs:8px; --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:24px; --r-full:999px;
+  --sh-1:0 1px 2px rgba(17,24,39,.04),0 1px 3px rgba(17,24,39,.06);
+  --sh-2:0 4px 14px rgba(17,24,39,.08),0 1px 3px rgba(17,24,39,.05);
+  --sh-3:0 16px 40px rgba(17,24,39,.16),0 4px 10px rgba(17,24,39,.06);
+
+  --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",system-ui,"Segoe UI",Roboto,sans-serif;
+  --fs-xs:12px; --fs-sm:13px; --fs-md:15px; --fs-base:16px; --fs-lg:18px; --fs-xl:22px; --fs-2xl:28px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --top-h:56px;
+  --maxw:640px;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink-1);font-family:var(--font);font-size:var(--fs-md);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+button,input,select{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.icon.sm{width:16px;height:16px}
+.icon.lg{width:28px;height:28px}
+.icon.fill{fill:currentColor;stroke:none}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.hidden{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
+.topbar-in{max-width:var(--maxw);margin:0 auto;height:var(--top-h);padding:0 var(--sp-4);display:flex;align-items:center;gap:var(--sp-3)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand-mark{width:32px;height:32px;border-radius:var(--r-xs);background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
+.brand-mark .icon{width:19px;height:19px;stroke-width:2.1}
+.brand-title{font-size:var(--fs-base);font-weight:700;line-height:1.2;letter-spacing:.01em}
+.brand-sub{font-size:var(--fs-xs);color:var(--ink-3);line-height:1.2}
+.stepper{max-width:var(--maxw);margin:0 auto;padding:0 var(--sp-4) 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.step{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--ink-4);font-weight:600;letter-spacing:.02em}
+.step i{display:block;height:3px;border-radius:2px;background:var(--line)}
+.step.done{color:var(--ink-3)}
+.step.done i{background:var(--accent-soft-2)}
+.step.now{color:var(--accent-ink)}
+.step.now i{background:var(--accent)}
+
+/* ---------- layout ---------- */
+.screen{display:none;max-width:var(--maxw);margin:0 auto;padding:var(--sp-4) var(--sp-4) calc(var(--sp-8) + var(--safe-b))}
+.screen.active{display:block;animation:enter .28s var(--ease)}
+@keyframes enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-title{display:flex;align-items:center;gap:var(--sp-2);margin:var(--sp-6) var(--sp-1) var(--sp-3)}
+.section-title h2{font-size:var(--fs-lg);font-weight:700;letter-spacing:.01em}
+.section-title .count{margin-left:auto;font-size:var(--fs-sm);color:var(--ink-3);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:var(--sp-4)}
+.card + .card{margin-top:var(--sp-3)}
+.hint{font-size:var(--fs-sm);color:var(--ink-3);line-height:1.65}
+.eyebrow{font-size:var(--fs-xs);font-weight:700;color:var(--accent-ink);letter-spacing:.06em}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 var(--sp-5);border-radius:var(--r-sm);border:1px solid transparent;background:var(--accent);color:#fff;font-weight:700;font-size:var(--fs-base);transition:transform .08s ease,background-color .15s ease,box-shadow .15s ease;user-select:none;-webkit-user-select:none;text-decoration:none}
+.btn:active{transform:scale(.97);background:var(--accent-press)}
+.btn.sec{background:var(--surface);color:var(--ink-1);border-color:var(--line-strong)}
+.btn.sec:active{background:var(--surface-2)}
+.btn.soft{background:var(--accent-soft);color:var(--accent-ink)}
+.btn.soft:active{background:var(--accent-soft-2)}
+.btn.ghost{background:transparent;color:var(--accent-ink)}
+.btn.ghost:active{background:var(--accent-soft)}
+.btn.block{width:100%}
+.btn.sm{min-height:38px;padding:0 var(--sp-3);font-size:var(--fs-sm);border-radius:var(--r-xs);gap:6px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn-row{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.btn-row > .btn{flex:1 1 0;min-width:130px}
+.icon-btn{width:40px;height:40px;border-radius:var(--r-sm);border:1px solid transparent;background:transparent;color:var(--ink-2);display:inline-grid;place-items:center;flex:none;transition:transform .08s ease,background-color .15s ease}
+.icon-btn:active{transform:scale(.92);background:var(--surface-2)}
+.icon-btn.bordered{border-color:var(--line);background:var(--surface)}
+.icon-btn.primary{background:var(--accent);color:#fff}
+.icon-btn.primary:active{background:var(--accent-press)}
+.icon-btn[aria-pressed="true"]{color:var(--accent-ink);background:var(--accent-soft)}
+
+/* segmented control */
+.seg{display:flex;background:var(--surface-2);border-radius:var(--r-sm);padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;border:0;background:transparent;border-radius:8px;font-size:var(--fs-sm);font-weight:650;color:var(--ink-2);transition:background-color .15s ease,color .15s ease}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent-ink);box-shadow:var(--sh-1)}
+.seg.sm button{min-height:30px;font-size:var(--fs-xs);padding:0 8px}
+
+/* chips & pills */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-xs);font-weight:650;padding:5px 10px;border-radius:var(--r-full);background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.chip .icon{width:14px;height:14px}
+.chip.acc{background:var(--accent-soft);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+
+/* banners */
+.banner{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.6}
+.banner .icon{margin-top:1px}
+.banner.warn{background:var(--warn-soft);color:var(--warn)}
+.banner.info{background:var(--accent-soft);color:var(--accent-ink)}
+.banner.danger{background:var(--danger-soft);color:var(--danger)}
+.banner b{font-weight:700}
+
+/* ---------- guide screen ---------- */
+.hero{padding:var(--sp-5) var(--sp-5) var(--sp-5);border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);box-shadow:var(--sh-2);position:relative;overflow:hidden}
+.hero h1{font-size:var(--fs-xl);font-weight:800;line-height:1.35;letter-spacing:.01em;margin:6px 0 8px}
+.hero p{color:var(--ink-2);font-size:var(--fs-md)}
+.hero-art{display:block;width:100%;height:auto;margin:var(--sp-4) 0 var(--sp-2);border-radius:var(--r-md);background:var(--accent-soft)}
+.hero .btn{margin-top:var(--sp-4)}
+.privacy{display:flex;gap:8px;align-items:flex-start;margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--ink-3);line-height:1.6}
+.privacy .icon{color:var(--accent-ink);width:16px;height:16px;margin-top:3px}
+.guide-list{display:grid;gap:var(--sp-3)}
+.guide-item{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-3);align-items:start}
+.guide-num{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;font-size:var(--fs-sm)}
+.guide-item h3{font-size:var(--fs-base);font-weight:700;line-height:1.4;margin-top:2px}
+.guide-item p{font-size:var(--fs-sm);color:var(--ink-2);margin-top:4px;line-height:1.65}
+.guide-art{grid-column:1 / -1;width:100%;height:auto;display:block;border-radius:var(--r-sm);background:var(--surface-2);margin-top:2px}
+.ill{fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ill-acc{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ill-fill{fill:var(--accent)}
+.ill-soft{fill:var(--accent-soft-2);stroke:none}
+.ill-dash{fill:none;stroke:var(--ink-4);stroke-width:1.6;stroke-dasharray:4 4;stroke-linecap:round}
+.ill-text{font:600 10px var(--font);fill:var(--ink-3)}
+.ill-text.acc{fill:var(--accent-ink)}
+.measure-groups{display:grid;gap:var(--sp-3)}
+.mg-title{font-size:var(--fs-xs);font-weight:700;color:var(--ink-3);letter-spacing:.04em;margin-bottom:6px}
+
+/* ---------- setup screen ---------- */
+.stage-wrap{background:#0F1115;border-radius:var(--r-md);overflow:hidden;position:relative}
+.stage{position:relative;margin:0 auto;width:100%;max-width:calc(56vh * var(--ar,1.7778));aspect-ratio:var(--ar,1.7778);background:#0F1115}
+.stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage video{object-fit:contain;background:#0F1115}
+.stage canvas{pointer-events:none}
+.stage-badge{position:absolute;left:10px;top:10px;font-size:var(--fs-xs);font-weight:700;color:#fff;background:rgba(15,17,21,.62);padding:4px 10px;border-radius:var(--r-full);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none}
+.stage-badge.acc{background:var(--accent)}
+.pctrl{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-1) 0}
+.pctrl .time{font-size:var(--fs-sm);color:var(--ink-2);font-weight:600}
+.pctrl .spacer{flex:1}
+.seek{position:relative;height:36px;margin:2px 4px 0;touch-action:none;cursor:pointer}
+.seek-track{position:absolute;left:0;right:0;top:15px;height:6px;border-radius:3px;background:var(--surface-2)}
+.seek-sel{position:absolute;top:15px;height:6px;border-radius:3px;background:var(--accent-soft-2)}
+.seek-fill{position:absolute;left:0;top:15px;height:6px;border-radius:3px;background:var(--accent)}
+.seek-head{position:absolute;top:8px;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);box-shadow:var(--sh-2)}
+.field-label{display:flex;align-items:baseline;justify-content:space-between;font-size:var(--fs-sm);font-weight:700;color:var(--ink-2);margin-bottom:6px}
+.field-label .num{color:var(--ink-1);font-size:var(--fs-base)}
+.range-row{display:grid;grid-template-columns:1fr auto;gap:var(--sp-2);align-items:center}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--surface-2)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--surface-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);box-shadow:var(--sh-2)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.range-sum{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r-sm);background:var(--accent-soft);color:var(--accent-ink);font-size:var(--fs-sm);font-weight:650;margin-top:var(--sp-3)}
+.kv{display:flex;justify-content:space-between;gap:var(--sp-3);font-size:var(--fs-sm);padding:6px 0;color:var(--ink-2)}
+.kv b{color:var(--ink-1);font-weight:650}
+
+/* ---------- progress screen ---------- */
+.progress-card{text-align:center;padding:var(--sp-6) var(--sp-4) var(--sp-5)}
+.ring{width:168px;height:168px;margin:0 auto;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bg{fill:none;stroke:var(--surface-2);stroke-width:10}
+.ring .fg{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .25s ease}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:34px;font-weight:800;letter-spacing:-.01em;line-height:1}
+.ring-pct small{font-size:16px;font-weight:700;margin-left:1px}
+.ring-sub{font-size:var(--fs-xs);color:var(--ink-3);margin-top:6px;font-weight:600}
+.progress-title{font-size:var(--fs-lg);font-weight:700;margin-top:var(--sp-4)}
+.progress-eta{font-size:var(--fs-sm);color:var(--ink-3);margin-top:4px;min-height:1.6em}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.steps li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 4px;font-size:var(--fs-md);color:var(--ink-4)}
+.steps li + li{border-top:1px solid var(--line)}
+.steps .st-ic{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-strong);color:transparent}
+.steps .st-ic .icon{width:14px;height:14px;stroke-width:2.6}
+.steps li.active{color:var(--ink-1);font-weight:650}
+.steps li.active .st-ic{border-color:var(--accent);border-top-color:transparent;animation:spin .9s linear infinite}
+.steps li.done{color:var(--ink-2)}
+.steps li.done .st-ic{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps .st-meta{font-size:var(--fs-xs);color:var(--ink-3);font-weight:600}
+@keyframes spin{to{transform:rotate(360deg)}}
+.preview-box{margin-top:var(--sp-3);border-radius:var(--r-sm);overflow:hidden;background:#0F1115;position:relative}
+.preview-box canvas{display:block;width:100%;height:auto}
+
+/* ---------- result screen ---------- */
+.summary-card{padding:var(--sp-5)}
+.summary-text{font-size:var(--fs-base);line-height:1.75;font-weight:600;margin-top:8px}
+.summary-card .chips{margin-top:var(--sp-3)}
+.timeline{margin:var(--sp-2) 4px 0;position:relative;user-select:none;-webkit-user-select:none}
+.tl-track{position:relative;height:40px;touch-action:none;cursor:pointer}
+.tl-base{position:absolute;left:0;right:0;top:22px;height:10px;border-radius:5px;background:var(--surface-2)}
+.tl-seg{position:absolute;top:22px;height:10px;background:var(--accent-soft-2)}
+.tl-seg.aim{background:var(--accent);opacity:.55}
+.tl-seg.draw{background:var(--accent);opacity:.3}
+.tl-seg.follow{background:var(--accent);opacity:.2}
+.tl-rel{position:absolute;top:18px;width:2px;height:18px;margin-left:-1px;background:var(--accent-ink);border-radius:1px}
+.tl-mark{position:absolute;top:0;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid var(--surface);box-shadow:var(--sh-1);cursor:pointer;padding:0}
+.tl-head{position:absolute;top:16px;width:3px;height:22px;margin-left:-1.5px;background:var(--ink-1);border-radius:2px;pointer-events:none}
+.tl-labels{position:relative;height:18px;font-size:10px;color:var(--ink-3);font-weight:650}
+.tl-labels span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.finding{padding:0;overflow:hidden;transition:box-shadow .2s ease,border-color .2s ease}
+.finding.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring),var(--sh-1)}
+.f-head{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:var(--sp-4) var(--sp-4) 0}
+.f-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:var(--fs-md)}
+.f-meta{font-size:var(--fs-xs);color:var(--ink-3);font-weight:650;letter-spacing:.02em}
+.f-title{font-size:var(--fs-base);font-weight:750;line-height:1.45;margin-top:2px}
+.f-body{padding:var(--sp-3) var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+.evidence{background:var(--surface-2);border-radius:var(--r-sm);padding:12px}
+.ev-label{font-size:var(--fs-xs);font-weight:700;color:var(--ink-3);letter-spacing:.04em}
+.ev-main{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-top:2px}
+.ev-val{font-size:var(--fs-xl);font-weight:800;letter-spacing:-.01em}
+.ev-unit{font-size:var(--fs-sm);color:var(--ink-2)}
+.ev-thr{font-size:var(--fs-sm);color:var(--ink-2);margin-top:2px}
+.ev-detail{font-size:var(--fs-xs);color:var(--ink-3);margin-top:4px;line-height:1.55}
+.gauge{position:relative;height:8px;border-radius:4px;background:var(--line);margin:12px 2px 4px}
+.gauge .ok{position:absolute;top:0;height:8px;background:var(--accent-soft-2);border-radius:4px}
+.gauge .val{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:var(--accent)}
+.gauge-legend{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-4);font-weight:600}
+.jump{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;min-height:42px;padding:0 12px;border-radius:var(--r-xs);border:1px solid var(--accent-soft-2);background:var(--surface);color:var(--accent-ink);font-size:var(--fs-sm);font-weight:700;text-align:left;transition:transform .08s ease,background-color .15s ease}
+.jump:active{transform:scale(.98);background:var(--accent-soft)}
+.jump .go{margin-left:auto}
+.cue{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:12px;border-radius:var(--r-sm);background:var(--accent-soft);color:var(--accent-ink)}
+.cue p{color:var(--ink-1);font-weight:700;font-size:var(--fs-md);line-height:1.6;margin-top:2px}
+.drills ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.drills li{display:grid;grid-template-columns:auto 1fr;gap:8px;font-size:var(--fs-sm);color:var(--ink-1);line-height:1.6}
+.drills li .icon{width:16px;height:16px;color:var(--accent-ink);margin-top:3px}
+details.why{border-top:1px solid var(--line);padding-top:10px}
+details.why summary{list-style:none;display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:650;color:var(--ink-2);cursor:pointer;min-height:32px}
+details.why summary::-webkit-details-marker{display:none}
+details.why summary .chev{margin-left:auto;transition:transform .2s ease}
+details.why[open] summary .chev{transform:rotate(180deg)}
+details.why .why-body{font-size:var(--fs-sm);color:var(--ink-2);line-height:1.7;padding:6px 2px 2px}
+details.why .src{font-size:var(--fs-xs);color:var(--ink-3);margin-top:6px}
+.note-shake{display:flex;gap:6px;align-items:center;font-size:var(--fs-xs);font-weight:650;color:var(--warn);background:var(--warn-soft);padding:6px 10px;border-radius:var(--r-xs)}
+.note-shake .icon{width:14px;height:14px}
+.good{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.good-ic{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center}
+.good h3{font-size:var(--fs-base);font-weight:750;line-height:1.5}
+.good .ev-detail{font-size:var(--fs-sm)}
+.empty{text-align:center;padding:var(--sp-6) var(--sp-4)}
+.empty-ic{width:52px;height:52px;border-radius:50%;margin:0 auto var(--sp-3);background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center}
+.empty h3{font-size:var(--fs-base);font-weight:700}
+.empty p{font-size:var(--fs-sm);color:var(--ink-3);margin-top:6px}
+.mtable{width:100%;border-collapse:collapse}
+.mrow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:12px 2px;border-top:1px solid var(--line);align-items:center}
+.mrow:first-child{border-top:0}
+.mrow .m-name{font-size:var(--fs-sm);font-weight:700}
+.mrow .m-name small{font-weight:600;color:var(--ink-3);margin-right:6px}
+.mrow .m-val{grid-column:1 / -1;font-size:var(--fs-xs);color:var(--ink-2);line-height:1.55}
+.pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-full);white-space:nowrap}
+.pill.flag{background:var(--accent);color:#fff}
+.pill.ok{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.na{background:var(--surface-2);color:var(--ink-3)}
+details.all > summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:var(--fs-base);min-height:28px}
+details.all > summary::-webkit-details-marker{display:none}
+details.all > summary .chev{margin-left:auto;color:var(--ink-3);transition:transform .2s ease}
+details.all[open] > summary .chev{transform:rotate(180deg)}
+details.all .mlist{margin-top:var(--sp-2)}
+.disclaimer{font-size:var(--fs-xs);color:var(--ink-3);line-height:1.7;margin:var(--sp-5) var(--sp-1) 0}
+
+/* ---------- error screen ---------- */
+.err-card{text-align:center;padding:var(--sp-6) var(--sp-5)}
+.err-ic{width:56px;height:56px;border-radius:50%;margin:0 auto var(--sp-3);background:var(--warn-soft);color:var(--warn);display:grid;place-items:center}
+.err-card h2{font-size:var(--fs-lg);font-weight:750}
+.err-card .err-sub{font-size:var(--fs-md);color:var(--ink-2);margin-top:8px;line-height:1.7}
+.tips{list-style:none;margin:var(--sp-4) 0 0;padding:0;text-align:left;display:grid;gap:8px}
+.tips li{display:grid;grid-template-columns:auto 1fr;gap:8px;font-size:var(--fs-sm);color:var(--ink-1);line-height:1.6}
+.tips li .icon{width:16px;height:16px;color:var(--accent-ink);margin-top:3px}
+.err-detail{font-size:var(--fs-xs);color:var(--ink-4);margin-top:var(--sp-3);word-break:break-all}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translate(-50%,20px);background:var(--ink-1);color:#fff;font-size:var(--fs-sm);font-weight:600;padding:10px 16px;border-radius:var(--r-full);box-shadow:var(--sh-3);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s var(--ease);z-index:100;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.offscreen-video{position:fixed;left:-10000px;top:0;width:160px;height:90px;opacity:0;pointer-events:none}
+@media (min-width:600px){
+  .hero{padding:var(--sp-6)}
+  .hero h1{font-size:var(--fs-2xl)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== icon sprite (inline SVG, no emoji) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-brand" viewBox="0 0 24 24"><circle cx="10" cy="14" r="7"/><circle cx="10" cy="14" r="3"/><path d="M10 14L20.5 3.5"/><path d="M16.5 3.5h4v4"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13.5" height="12" rx="2.5"/><path d="M16 10.2l5.5-3.2v10l-5.5-3.2z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15.5V4"/><path d="M7 8.5L12 3.5l5 5"/><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l11-6.8a.8.8 0 0 0 0-1.4l-11-6.8a.8.8 0 0 0-1.2.7z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.8 2.8L16.2 9.6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.2L2.6 17.6A2 2 0 0 0 4.3 20.6h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5"/><path d="M12 17.2v.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.8v.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 1 0-2.4 5.9"/><path d="M20.5 4.5v6h-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="11" rx="2.2"/><path d="M18.5 10.5v3"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.1"/><path d="M12 7.5v7"/><path d="M12 14.5l-3.2 6"/><path d="M12 14.5l3.2 6"/><path d="M6.5 10h11"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M2.5 9v6"/><path d="M21.5 9v6"/><path d="M10.5 18h3"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-scissors" viewBox="0 0 24 24"><path d="M4.5 5v14"/><path d="M19.5 5v14"/><path d="M8 12h8"/><path d="M10.5 9.5L8 12l2.5 2.5"/><path d="M13.5 9.5L16 12l-2.5 2.5"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.2 1.1 2V16h5v-.2c0-.8.4-1.5 1.1-2A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2.5l3 3-3 3"/><path d="M4 11V9.5a4 4 0 0 1 4-4h12"/><path d="M7 21.5l-3-3 3-3"/><path d="M20 13v1.5a4 4 0 0 1-4 4H4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5V5.5"/><path d="M20 18v3H6.5"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-shake" viewBox="0 0 24 24"><rect x="7.5" y="4" width="9" height="16" rx="2"/><path d="M3.5 8.5v7"/><path d="M20.5 8.5v7"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11"/><path d="M9 12h11"/><path d="M9 17.5h11"/><path d="M4.5 6.5h.01"/><path d="M4.5 12h.01"/><path d="M4.5 17.5h.01"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9.5 2.5v3M14.5 2.5v3M9.5 18.5v3M14.5 18.5v3M2.5 9.5h3M2.5 14.5h3M18.5 9.5h3M18.5 14.5h3"/></symbol>
+    <symbol id="i-skeleton" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.1"/><path d="M12 7.5v6.5"/><path d="M12 14l-3 6.5"/><path d="M12 14l3 6.5"/><path d="M5 9.5l7 1 7-1"/><circle cx="5" cy="9.5" r=".6"/><circle cx="19" cy="9.5" r=".6"/></symbol>
+    <symbol id="i-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .9-1 1.6v.5"/><path d="M12 17v.01"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M3.5 16.5l13-13 4 4-13 13z"/><path d="M7.5 12.5l2 2M10.5 9.5l2 2M13.5 6.5l2 2"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="brand-mark"><svg class="icon"><use href="#i-brand"/></svg></div>
+      <div>
+        <div class="brand-title">射形チェック</div>
+        <div class="brand-sub">アーチェリー・フォーム診断（リカーブ）</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="btn-guide" data-action="go-guide" aria-label="撮影ガイドを見る" title="撮影ガイド"><svg class="icon"><use href="#i-help"/></svg></button>
+  </div>
+  <nav class="stepper" aria-label="進行状況">
+    <div class="step" data-step="guide"><i></i>撮影ガイド</div>
+    <div class="step" data-step="setup"><i></i>区間を選ぶ</div>
+    <div class="step" data-step="progress"><i></i>解析</div>
+    <div class="step" data-step="result"><i></i>結果</div>
+  </nav>
+</header>
+
+<main>
+<!-- ===================== 1. 撮影ガイド ===================== -->
+<section class="screen active" id="screen-guide" aria-labelledby="guide-h">
+  <div class="hero">
+    <div class="eyebrow">ONE-SHOT FORM CHECK</div>
+    <h1 id="guide-h">1射の動画から、射形をその場でチェック</h1>
+    <p>スマホで撮ったリカーブの1射を骨格推定で解析し、測定値にもとづくチェックポイントを最大3つと、良かった点を1つお返しします。</p>
+    <svg class="hero-art" viewBox="0 0 320 150" role="img" aria-label="フルドローの射手を横から見た図">
+      <rect x="0" y="0" width="320" height="150" fill="#EDF2FD"/>
+      <circle cx="286" cy="58" r="20" class="ill-acc" style="fill:#fff"/><circle cx="286" cy="58" r="12" class="ill-acc"/><circle cx="286" cy="58" r="4" class="ill-fill"/>
+      <path d="M268 58H215" class="ill-dash"/>
+      <g class="ill">
+        <circle cx="140" cy="38" r="9"/>
+        <path d="M140 47v42"/>
+        <path d="M140 89l-12 44"/><path d="M140 89l12 44"/>
+        <path d="M128 56h24"/>
+        <path d="M152 56l58 2"/>
+        <path d="M128 56l-22 1"/>
+        <path d="M106 57l38-8"/>
+      </g>
+      <path d="M208 20q14 38 0 76" class="ill-acc"/>
+      <path d="M208 20L146 50 208 96" class="ill" style="stroke-width:1.2;stroke:#A3A8B1"/>
+      <path d="M146 50H238" class="ill-acc" style="stroke-width:1.6"/>
+      <circle cx="106" cy="57" r="4" class="ill-fill"/><circle cx="152" cy="56" r="4" class="ill-fill"/><circle cx="128" cy="56" r="4" class="ill-fill"/><circle cx="210" cy="58" r="4" class="ill-fill"/>
+      <text x="16" y="138" class="ill-text acc">骨格の動きを端末内で解析</text>
+    </svg>
+    <button class="btn block" data-action="pick-video"><svg class="icon"><use href="#i-video"/></svg>動画を選んで診断する</button>
+    <div class="privacy"><svg class="icon"><use href="#i-lock"/></svg><span>動画は端末内で解析し、外部へは送信しません。解析エンジンとモデル（約25MB）の読み込みにだけ通信が発生します（2回目以降はブラウザのキャッシュが使われることが多いです）。</span></div>
+  </div>
+
+  <div class="section-title"><svg class="icon" style="color:var(--accent-ink)"><use href="#i-video"/></svg><h2>撮影のしかた</h2></div>
+  <div class="card">
+    <div class="guide-list">
+      <div class="guide-item">
+        <div class="guide-num">1</div>
+        <div><h3>横から、射手の正面（胸が向いている方向）から撮る</h3><p>射線と直角の位置から、射手の胸に向かって構えます。引きの動き全体が横に流れて見える角度です。</p></div>
+        <svg class="guide-art" viewBox="0 0 300 120" role="img" aria-label="撮影位置の見取り図：射手の胸の正面にカメラ、的は横方向">
+          <path d="M120 44H246" class="ill-dash"/>
+          <circle cx="262" cy="44" r="15" class="ill-acc" style="fill:#fff"/><circle cx="262" cy="44" r="8" class="ill-acc"/><circle cx="262" cy="44" r="2.5" class="ill-fill"/>
+          <text x="262" y="74" text-anchor="middle" class="ill-text">的</text>
+          <ellipse cx="100" cy="44" rx="24" ry="9" class="ill" style="fill:#fff"/>
+          <circle cx="100" cy="44" r="7" class="ill" style="fill:#fff"/>
+          <path d="M124 44h22" class="ill"/>
+          <path d="M146 33q6 11 0 22" class="ill-acc"/>
+          <text x="100" y="24" text-anchor="middle" class="ill-text">射手（上から見た図）</text>
+          <path d="M100 96L74 58M100 96L126 58" class="ill-dash" style="stroke:#2754C5;opacity:.6"/>
+          <rect x="88" y="94" width="24" height="15" rx="3" class="ill-acc" style="fill:#fff"/><circle cx="100" cy="101.5" r="3.5" class="ill-acc"/>
+          <text x="124" y="108" class="ill-text acc">カメラ（胸の正面・射線と直角）</text>
+        </svg>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">2</div>
+        <div><h3>全身を入れる。スマホは横向きがおすすめ</h3><p>頭から足先まで、弓を押す手の先と引き肘まで画面に収めます。足元まで入ると手ぶれの補正が安定します。</p></div>
+        <svg class="guide-art" viewBox="0 0 300 120" role="img" aria-label="横向きの画面に射手の全身が収まっている図">
+          <rect x="62" y="8" width="176" height="104" rx="10" class="ill" style="fill:#fff"/>
+          <path d="M80 22v-6h8M220 22v-6h-8M80 98v6h8M220 98v6h-8" class="ill-acc"/>
+          <g class="ill"><circle cx="138" cy="30" r="6"/><path d="M138 36v32"/><path d="M138 68l-9 33"/><path d="M138 68l9 33"/><path d="M129 44h18"/><path d="M147 44l42 1"/><path d="M129 44l-16 1 28-6"/></g>
+          <path d="M188 24q10 21 0 42" class="ill-acc"/>
+          <text x="150" y="118" text-anchor="middle" class="ill-text">弓手の先・引き肘・足先まで</text>
+        </svg>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">3</div>
+        <div><h3>手持ちは両手で、なるべく動かさない</h3><p>三脚は不要です。脇を締めて両手で持ち、ズームや撮影者の移動は避けてください。揺れが大きいときは結果に「参考値」と表示します。</p></div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">4</div>
+        <div><h3>1射をまるごと撮る</h3><p>セットアップ（弓を上げる動き）の前から撮り始め、リリース後も1秒以上撮り続けます。複数射が入っている場合は、最初の完全な1射を自動で選びます。</p></div>
+        <svg class="guide-art" viewBox="0 0 300 74" role="img" aria-label="1射のフェーズの並び：セット、セットアップ、ドロー、エイミング、リリース、フォロースルー">
+          <rect x="14" y="26" width="272" height="12" rx="6" fill="#F1F3F6"/>
+          <rect x="14" y="26" width="40" height="12" rx="6" fill="#D6E1F8"/>
+          <rect x="54" y="26" width="50" height="12" fill="#D6E1F8"/>
+          <rect x="104" y="26" width="56" height="12" fill="#2754C5" opacity=".35"/>
+          <rect x="160" y="26" width="70" height="12" fill="#2754C5" opacity=".6"/>
+          <rect x="230" y="26" width="56" height="12" rx="0" fill="#2754C5" opacity=".22"/>
+          <path d="M230 20v24" stroke="#2148AE" stroke-width="2.2"/>
+          <text x="34" y="56" text-anchor="middle" class="ill-text">セット</text>
+          <text x="79" y="56" text-anchor="middle" class="ill-text">セットアップ</text>
+          <text x="132" y="56" text-anchor="middle" class="ill-text">ドロー</text>
+          <text x="195" y="56" text-anchor="middle" class="ill-text">エイミング</text>
+          <text x="258" y="56" text-anchor="middle" class="ill-text">フォロー</text>
+          <text x="230" y="14" text-anchor="middle" class="ill-text acc">リリース</text>
+          <text x="14" y="70" class="ill-text acc">ここから撮影</text>
+          <text x="286" y="70" text-anchor="end" class="ill-text acc">リリース後1秒以上</text>
+        </svg>
+      </div>
+      <div class="guide-item">
+        <div class="guide-num">5</div>
+        <div><h3>明るく、背景はすっきりと</h3><p>逆光を避け、射手の後ろや前に人が重ならない位置から撮ると骨格が安定して検出されます。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><svg class="icon" style="color:var(--accent-ink)"><use href="#i-ruler"/></svg><h2>チェックする12項目</h2></div>
+  <div class="card">
+    <div class="measure-groups">
+      <div><div class="mg-title">セットアップ</div><div class="chips"><span class="chip">両手の連動</span></div></div>
+      <div><div class="mg-title">フルドロー・エイミング</div><div class="chips"><span class="chip">弓肩の上がり</span><span class="chip">引き肘のライン</span><span class="chip">アンカーの安定性</span><span class="chip">クリーピング</span><span class="chip">コラプシング</span><span class="chip">体幹の傾き</span><span class="chip">頭の傾き</span><span class="chip">エイミング時間</span></div></div>
+      <div><div class="mg-title">リリース・フォロースルー</div><div class="chips"><span class="chip">プラッキング</span><span class="chip">弓腕の残身</span><span class="chip">引き手のフォロースルー</span></div></div>
+    </div>
+    <p class="hint" style="margin-top:12px">指標は肩幅を1とした「体の軸」基準の相対値で、手持ち撮影の揺れの影響を受けにくい設計です。閾値は指導文献の定性的な基準をもとにしたアプリの運用値で、結果は測定にもとづく目安です。</p>
+  </div>
+</section>
+
+<!-- ===================== 2. 区間の選択 ===================== -->
+<section class="screen" id="screen-setup" aria-labelledby="setup-h">
+  <div class="section-title" style="margin-top:4px"><h2 id="setup-h">動画の確認と解析区間</h2></div>
+  <div class="card" style="padding:12px">
+    <div class="stage-wrap"><div class="stage" id="pv-stage"><video id="pv" playsinline muted preload="auto"></video><div class="stage-badge" id="pv-badge">プレビュー</div></div></div>
+    <div class="seek" id="pv-seek" aria-label="再生位置"><div class="seek-track"></div><div class="seek-sel" id="pv-sel"></div><div class="seek-fill" id="pv-fill"></div><div class="seek-head" id="pv-head"></div></div>
+    <div class="pctrl">
+      <button class="icon-btn primary" data-action="pv-play" aria-label="再生／一時停止"><svg class="icon fill" id="pv-play-ic"><use href="#i-play"/></svg></button>
+      <span class="time num" id="pv-time">0.0 / 0.0秒</span>
+      <span class="spacer"></span>
+      <button class="btn sm sec" data-action="set-start">ここを開始に</button>
+      <button class="btn sm sec" data-action="set-end">ここを終了に</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field-label"><span>開始</span><span class="num" id="rs-val">0.0秒</span></div>
+    <input type="range" id="rs" min="0" max="1" step="0.1" value="0" aria-label="解析の開始位置">
+    <div class="field-label" style="margin-top:8px"><span>終了</span><span class="num" id="re-val">0.0秒</span></div>
+    <input type="range" id="re" min="0" max="1" step="0.1" value="1" aria-label="解析の終了位置">
+    <div class="range-sum"><svg class="icon sm"><use href="#i-scissors"/></svg><span id="range-sum">解析区間</span></div>
+    <p class="hint" style="margin-top:10px">セットアップの前からリリース後1秒までの1射分に絞ると、速く正確に解析できます。区間内に複数射があっても、最初の完全な1射を自動で対象にします。</p>
+  </div>
+
+  <div class="card">
+    <div class="field-label"><span>利き手</span></div>
+    <div class="seg" id="hand-seg" role="group" aria-label="利き手">
+      <button data-action="hand" data-hand="auto" aria-pressed="true">自動判定</button>
+      <button data-action="hand" data-hand="right" aria-pressed="false">右利き</button>
+      <button data-action="hand" data-hand="left" aria-pressed="false">左利き</button>
+    </div>
+    <p class="hint" style="margin-top:8px">自動判定では、フルドローで顔に近い手を引き手、遠い手を弓手として判定します。</p>
+    <div style="margin-top:10px">
+      <div class="kv"><span>解析するフレーム</span><b class="num" id="est-frames">-</b></div>
+      <div class="kv"><span>処理時間の目安</span><b class="num" id="est-time">-</b></div>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn sec" data-action="pick-video"><svg class="icon"><use href="#i-refresh"/></svg>動画を選び直す</button>
+    <button class="btn" data-action="analyze" id="btn-analyze"><svg class="icon"><use href="#i-cpu"/></svg>解析を開始</button>
+  </div>
+</section>
+
+<!-- ===================== 3. 解析中 ===================== -->
+<section class="screen" id="screen-progress" aria-labelledby="prog-h" aria-live="polite">
+  <div class="card progress-card">
+    <div class="ring">
+      <svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"/></svg>
+      <div class="ring-label"><div class="ring-pct num" id="ring-pct">0<small>%</small></div><div class="ring-sub num" id="ring-sub">準備中</div></div>
+    </div>
+    <h2 class="progress-title" id="prog-h">端末内で解析しています</h2>
+    <p class="progress-eta num" id="prog-eta">解析エンジンを準備しています</p>
+  </div>
+  <div class="card">
+    <ol class="steps" id="steps">
+      <li data-st="engine"><span class="st-ic"><svg class="icon"><use href="#i-check"/></svg></span><span>解析エンジンとモデルの読み込み</span><span class="st-meta" id="st-engine-meta"></span></li>
+      <li data-st="frames"><span class="st-ic"><svg class="icon"><use href="#i-check"/></svg></span><span>フレームごとの骨格推定</span><span class="st-meta num" id="st-frames-meta"></span></li>
+      <li data-st="phases"><span class="st-ic"><svg class="icon"><use href="#i-check"/></svg></span><span>射のフェーズ検出</span><span class="st-meta" id="st-phases-meta"></span></li>
+      <li data-st="advice"><span class="st-ic"><svg class="icon"><use href="#i-check"/></svg></span><span>指標の算出とアドバイス生成</span><span class="st-meta" id="st-advice-meta"></span></li>
+    </ol>
+    <div class="preview-box" id="pp-box"><canvas id="pp" width="320" height="180"></canvas><div class="stage-badge" id="pp-badge">骨格推定のプレビュー</div></div>
+  </div>
+  <div style="margin-top:16px"><button class="btn sec block" data-action="cancel"><svg class="icon"><use href="#i-x"/></svg>解析を中止</button></div>
+  <p class="hint" style="text-align:center;margin-top:12px">画面を閉じたり、ほかのアプリに切り替えたりすると解析が止まることがあります。</p>
+</section>
+
+<!-- ===================== 4. 結果 ===================== -->
+<section class="screen" id="screen-result" aria-labelledby="res-h">
+  <div class="card summary-card">
+    <div class="eyebrow">総合コメント</div>
+    <h2 class="sr" id="res-h">診断結果</h2>
+    <p class="summary-text" id="res-summary"></p>
+    <div class="chips" id="res-chips"></div>
+  </div>
+  <div id="res-banner"></div>
+
+  <div class="section-title"><svg class="icon" style="color:var(--accent-ink)"><use href="#i-skeleton"/></svg><h2>骨格オーバーレイで確認</h2></div>
+  <div class="card" style="padding:12px" id="player-card">
+    <div class="stage-wrap"><div class="stage" id="rv-stage"><video id="rv" playsinline muted preload="auto"></video><canvas id="ov"></canvas><div class="stage-badge acc" id="rv-phase">-</div></div></div>
+    <div class="timeline" id="tl">
+      <div class="tl-track" id="tl-track"><div class="tl-base"></div><div id="tl-segs"></div><div id="tl-marks"></div><div class="tl-head" id="tl-head"></div></div>
+      <div class="tl-labels" id="tl-labels"></div>
+    </div>
+    <div class="pctrl">
+      <button class="icon-btn primary" data-action="rv-play" aria-label="再生／一時停止"><svg class="icon fill" id="rv-play-ic"><use href="#i-play"/></svg></button>
+      <span class="time num" id="rv-time">0.0秒</span>
+      <span class="spacer"></span>
+      <div class="seg sm" id="rate-seg" role="group" aria-label="再生速度">
+        <button data-action="rate" data-rate="0.25" aria-pressed="false">0.25x</button>
+        <button data-action="rate" data-rate="0.5" aria-pressed="true">0.5x</button>
+        <button data-action="rate" data-rate="1" aria-pressed="false">1x</button>
+      </div>
+      <button class="icon-btn" data-action="skel" id="btn-skel" aria-pressed="true" aria-label="骨格の表示切替"><svg class="icon"><use href="#i-eye"/></svg></button>
+    </div>
+  </div>
+
+  <div class="section-title"><svg class="icon" style="color:var(--accent-ink)"><use href="#i-target"/></svg><h2>チェックポイント</h2><span class="count" id="find-count"></span></div>
+  <div id="findings"></div>
+
+  <div class="section-title"><svg class="icon" style="color:var(--accent-ink)"><use href="#i-check-circle"/></svg><h2>良かった点</h2></div>
+  <div id="goodpoint"></div>
+
+  <div class="card" style="margin-top:24px">
+    <details class="all" id="all-metrics">
+      <summary><svg class="icon" style="color:var(--accent-ink)"><use href="#i-list"/></svg>すべての測定値<svg class="icon chev"><use href="#i-chev-down"/></svg></summary>
+      <div class="mlist" id="mlist"></div>
+    </details>
+  </div>
+
+  <p class="disclaimer">この結果は、骨格推定による測定にもとづく目安です。数値の閾値は指導文献（World Archery コーチマニュアル、USA Archery NTS など）の定性的な基準をもとにしたアプリの運用値で、体格や撮影条件で変わります。フォームの最終的な判断は、コーチや実際の着弾とあわせて行ってください。</p>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn sec" data-action="back-setup"><svg class="icon"><use href="#i-scissors"/></svg>区間を変えて再解析</button>
+    <button class="btn" data-action="pick-video"><svg class="icon"><use href="#i-video"/></svg>別の動画を診断</button>
+  </div>
+</section>
+
+<!-- ===================== エラー ===================== -->
+<section class="screen" id="screen-error" aria-labelledby="err-h">
+  <div class="card err-card">
+    <div class="err-ic"><svg class="icon lg"><use href="#i-alert"/></svg></div>
+    <h2 id="err-h">フェーズを検出できませんでした</h2>
+    <p class="err-sub" id="err-sub"></p>
+    <ul class="tips" id="err-tips"></ul>
+    <p class="err-detail" id="err-detail"></p>
+  </div>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn sec" data-action="back-setup" id="err-back"><svg class="icon"><use href="#i-scissors"/></svg>区間を選び直す</button>
+    <button class="btn" data-action="pick-video"><svg class="icon"><use href="#i-video"/></svg>別の動画を選ぶ</button>
+  </div>
+</section>
+</main>
+
+<input type="file" id="file-input" accept="video/*" class="sr" tabindex="-1" aria-hidden="true">
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+//LOGIC-START
+/*
+ * 射形診断ロジック（DOM 非依存の純関数群）
+ * ------------------------------------------------------------------
+ * 入力 : frames = [{ t: 動画内の秒, lm: MediaPipe Pose の正規化ランドマーク 33 点 [{x,y,z,visibility}] | null }]
+ *        opts   = { width, height（解析画像の画素数。縦横比の補正に使う）, handedness: 'auto' | 'right' | 'left' }
+ * 出力 : ArcheryLogic.analyze(frames, opts)
+ *        → { ok, error, hand, phases, segments, shake, metrics, findings, good, summary, ... }
+ *
+ * 指標・閾値・アドバイスは research.md §3 の対応表（M1〜M12）に準拠する。
+ * 座標は「体の軸」基準：原点＝肩中点、横軸＝腰ライン（的の方向を正）、縦軸＝下向き正、単位＝肩幅 W。
+ * 手持ち撮影による回転（ロール）は、下半身の脚軸（足首中点→腰中点）のフレームごとの傾きで追従し、
+ * 水平の基準は腰ラインの中央値とする。並進は肩中点を原点にすることで、拡大縮小は肩幅で割ることで打ち消す。
+ */
+var ArcheryLogic = (function () {
+  'use strict';
+
+  var VERSION = '1.0.0';
+
+  /* ---------- ランドマーク番号（MediaPipe Pose 33 点） ---------- */
+  var SIDE = {
+    L: { s: 11, e: 13, w: 15, h: 23, k: 25, a: 27, ear: 7 },
+    R: { s: 12, e: 14, w: 16, h: 24, k: 26, a: 28, ear: 8 }
+  };
+  var PAIRS = [[1, 4], [2, 5], [3, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30], [31, 32]];
+  var SWAP = (function () {
+    var m = [];
+    for (var i = 0; i < 33; i++) m[i] = i;
+    PAIRS.forEach(function (p) { m[p[0]] = p[1]; m[p[1]] = p[0]; });
+    return m;
+  })();
+
+  /* ---------- 設定（research.md の閾値以外は実装上の運用値） ---------- */
+  var CFG = {
+    minVis: 0.3,          // これ未満の可視度のランドマークは欠損扱い
+    maxGapSec: 0.35,      // これ以下の欠損は線形補間
+    scaleWinSec: 0.3,     // 肩幅 W の移動中央値の窓（片側）
+    shoulderCm: 40,       // 表示用：肩幅 40cm 換算（research.md §3 M1 の換算と同じ）
+    // フェーズ検出
+    nearMax: 0.9,         // フルドロー時の「引き手首〜頭部基準点」距離の上限（W）
+    spanMin: 1.2,         // フルドロー時の両手首間距離の下限（W）
+    nearMargin: 0.3,      // フルドロー候補：最小距離＋この値以内
+    spanFrac: 0.8,        // フルドロー候補：両手首間距離が最大値のこの割合以上
+    minRunSec: 0.25,      // フルドロー候補区間の最短長
+    anchorNear: 0.08,     // アンカー到達：区間内の最小距離＋この値以内
+    anchorSpeed: 0.15,    // アンカー到達：引き手首の速度（W/秒、0.33 秒平滑）がこの値未満になり
+    anchorHoldSpeed: 0.4, //   その後 anchorHoldSec の間、この値未満で安定していること
+    anchorHoldSec: 0.3,
+    releaseSpeed: 2.0,    // リリース：引き手首の速度（W/秒）がこの値を超える
+    releaseAway: 0.08,    // リリース直後も頭部基準点から離れていること（W）
+    releaseFwdMax: 0.1,   // リリース時に的の方向へ大きく動くものは除外（W/フレーム）
+    releaseOnset: 0.6,    // リリースの動き始め：この速度（W/秒）以上の直前フレームまで遡る
+    fallbackAway: 0.15,   // 速度で検出できない場合：保持中の距離＋この値で離れ始め
+    letdownFwd: 0.1,      // 引き手が的の方向へ戻りながら離れる＝引き戻し（レットダウン）
+    lookBackSec: 8,       // アンカーから遡ってセットアップ等を探す範囲
+    drawRiseMin: 0.3,     // ドローイングとみなす両手首間距離の増加量（W）
+    setupRiseMin: 0.5,    // セットアップとみなす弓手首の上昇量（W）
+    // 指標
+    aimEdgeSec: 0.2,      // エイミング開始・終了の平均をとる長さ
+    aimSmoothSec: 0.5,    // アンカー安定性の移動平均の長さ（検出ノイズ対策。1 Hz 以上の細かい揺れは小さめに出る）
+    minAimFrames: 4,      // エイミング系の指標に必要な最小フレーム数
+    pluckSec: 0.3,        // M6：リリース直後 0.3 秒
+    followSec: 0.5,       // M7・M8：リリース 0.5 秒後
+    followTol: 0.1,       // 上記の時刻に許すずれ
+    pluckMinBack: 0.05,   // M6：後方成分がこれ未満なら比率は計算しない（ノイズ対策）
+    pluckMinOut: 0.05,    // M6：外側成分の下限（ノイズ対策）
+    pluckRatioCap: 3,     // M6：比率の上限（優先度づけ用）
+    earMinSep: 0.2,       // M12：両耳の横方向の間隔がこれ未満なら角度が不安定（W）
+    // カメラ揺れ
+    shakeWinSec: 0.5,     // 移動平均の窓（全幅）
+    shakeThreshold: 0.02  // research.md §5
+  };
+
+  /* ---------- 小さな数値ユーティリティ ---------- */
+  function isNum(x) { return typeof x === 'number' && isFinite(x); }
+  function nums(a) { var o = []; for (var i = 0; i < a.length; i++) if (isNum(a[i])) o.push(a[i]); return o; }
+  function mean(a) { var b = nums(a); if (!b.length) return NaN; var s = 0; for (var i = 0; i < b.length; i++) s += b[i]; return s / b.length; }
+  function quantile(a, q) {
+    var b = nums(a).sort(function (x, y) { return x - y; });
+    if (!b.length) return NaN;
+    var pos = (b.length - 1) * q, lo = Math.floor(pos), hi = Math.ceil(pos);
+    return b[lo] + (b[hi] - b[lo]) * (pos - lo);
+  }
+  function median(a) { return quantile(a, 0.5); }
+  function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
+  function hyp(x, y) { return Math.sqrt(x * x + y * y); }
+  function mid(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+  function dist(a, b) { return hyp(a.x - b.x, a.y - b.y); }
+  function bdist(a, b) { return hyp(a.u - b.u, a.v - b.v); }
+  function deg(r) { return r * 180 / Math.PI; }
+  function seq(a, b) { var o = []; for (var i = a; i <= b; i++) o.push(i); return o; }
+  function idxNear(t, x) {
+    var lo = 0, hi = t.length - 1;
+    if (hi < 0) return -1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (t[m] < x) lo = m; else hi = m; }
+    return Math.abs(t[lo] - x) <= Math.abs(t[hi] - x) ? lo : hi;
+  }
+  function frameDt(t) {
+    var d = [];
+    for (var i = 1; i < t.length; i++) d.push(t[i] - t[i - 1]);
+    var m = median(d);
+    return isNum(m) && m > 0 ? m : 1 / 15;
+  }
+
+  /* ---------- 1. 入力の整形（縦横比補正・欠損補間） ---------- */
+  function prepare(frames, opts) {
+    var aspect = opts && opts.width > 0 && opts.height > 0 ? opts.width / opts.height : 1;
+    var list = (frames || []).filter(function (f) { return f && isNum(f.t); }).slice().sort(function (a, b) { return a.t - b.t; });
+    var t = [], P = [];
+    list.forEach(function (f) {
+      t.push(f.t);
+      if (!f.lm || f.lm.length < 33) { P.push(null); return; }
+      var pts = [];
+      for (var i = 0; i < 33; i++) {
+        var q = f.lm[i];
+        var vis = q && isNum(q.visibility) ? q.visibility : 1;
+        if (!q || !isNum(q.x) || !isNum(q.y) || vis < CFG.minVis) { pts.push(null); continue; }
+        pts.push({ x: q.x * aspect, y: q.y, v: vis });
+      }
+      P.push(pts);
+    });
+    return { t: t, P: P, aspect: aspect };
+  }
+
+  function fillGaps(t, P) {
+    var n = t.length;
+    var out = P.map(function (pts) { return pts ? pts.slice() : null; });
+    for (var k = 0; k < 33; k++) {
+      var last = -1;
+      for (var i = 0; i < n; i++) {
+        var q = out[i] && out[i][k];
+        if (!q) continue;
+        if (last >= 0 && i - last > 1 && t[i] - t[last] <= CFG.maxGapSec + 1e-9) {
+          var a = out[last][k];
+          for (var j = last + 1; j < i; j++) {
+            var r = (t[j] - t[last]) / (t[i] - t[last]);
+            if (!out[j]) { out[j] = []; for (var z = 0; z < 33; z++) out[j].push(null); }
+            out[j][k] = { x: a.x + (q.x - a.x) * r, y: a.y + (q.y - a.y) * r, v: Math.min(a.v, q.v), interp: true };
+          }
+        }
+        last = i;
+      }
+    }
+    return out;
+  }
+
+  /* ---------- 2. 利き手・的の方向の判定（research.md §4-1） ---------- */
+  function headRefImg(p) {
+    var n = p[0], m1 = p[9], m2 = p[10];
+    if (n && m1 && m2) return { x: (n.x + (m1.x + m2.x) / 2) / 2, y: (n.y + (m1.y + m2.y) / 2) / 2 };
+    if (n) return { x: n.x, y: n.y };
+    if (m1 && m2) return mid(m1, m2);
+    return null;
+  }
+
+  function detectSides(P, handedness) {
+    var votesR = 0, votesL = 0, dirVotes = 0, n = 0;
+    for (var i = 0; i < P.length; i++) {
+      var p = P[i];
+      if (!p || !p[11] || !p[12] || !p[15] || !p[16]) continue;
+      var W = dist(p[11], p[12]);
+      var H = headRefImg(p);
+      if (!(W > 1e-6) || !H) continue;
+      var dL = dist(p[15], H) / W, dR = dist(p[16], H) / W;
+      if (Math.min(dL, dR) < CFG.nearMax && Math.max(dL, dR) > 1.3 && dist(p[15], p[16]) / W > CFG.spanMin) {
+        var drawIsR = dR < dL;
+        if (drawIsR) votesR++; else votesL++;
+        var bow = drawIsR ? p[15] : p[16];
+        dirVotes += bow.x > H.x ? 1 : -1;
+        n++;
+      }
+    }
+    if (!n) return null;
+    var autoHand = votesR >= votesL ? 'right' : 'left';
+    var manual = handedness === 'right' || handedness === 'left';
+    return {
+      hand: manual ? handedness : autoHand,
+      autoHand: autoHand,
+      source: manual ? 'manual' : 'auto',
+      agreement: Math.max(votesR, votesL) / n,
+      dir: dirVotes >= 0 ? 1 : -1,
+      votes: n
+    };
+  }
+
+  function rolesFor(hand) {
+    return hand === 'left' ? { B: SIDE.R, D: SIDE.L } : { B: SIDE.L, D: SIDE.R };
+  }
+
+  /* 左右ラベルの入れ替わりを補正し（弓側の肩は常に的の側）、的の方向が +x になるよう鏡映する */
+  function orient(P, sides, R) {
+    var flips = [];
+    var Q = P.map(function (p) {
+      if (!p) { flips.push(false); return null; }
+      var a = p[R.B.s], b = p[R.D.s], flip = false;
+      if (a && b) flip = (a.x - b.x) * sides.dir < 0;
+      else if (p[R.B.h] && p[R.D.h]) flip = (p[R.B.h].x - p[R.D.h].x) * sides.dir < 0;
+      flips.push(flip);
+      var src = flip ? p.map(function (_, k) { return p[SWAP[k]]; }) : p;
+      return src.map(function (q) { return q ? { x: q.x * sides.dir, y: q.y, v: q.v } : null; });
+    });
+    return { Q: Q, flips: flips };
+  }
+
+  /* ---------- 3. 体の軸の座標系（正規化） ---------- */
+  function rollingMedian(t, arr, halfSec) {
+    var n = t.length, out = new Array(n), lo = 0, hi = -1;
+    for (var i = 0; i < n; i++) {
+      while (lo < n && t[lo] < t[i] - halfSec - 1e-9) lo++;
+      while (hi + 1 < n && t[hi + 1] <= t[i] + halfSec + 1e-9) hi++;
+      out[i] = median(arr.slice(lo, hi + 1));
+    }
+    return out;
+  }
+
+  function median3(arr) {
+    // 単発の外れ値を除く（段差＝リリースの急な動きは保存される）
+    var n = arr.length, out = arr.slice();
+    for (var i = 1; i < n - 1; i++) {
+      var a = arr[i - 1], b = arr[i], c = arr[i + 1];
+      if (!a || !b || !c) continue;
+      out[i] = { u: med3(a.u, b.u, c.u), v: med3(a.v, b.v, c.v) };
+    }
+    return out;
+  }
+  function med3(a, b, c) { return Math.max(Math.min(a, b), Math.min(Math.max(a, b), c)); }
+
+  function buildBody(t, Q, R) {
+    var n = t.length, dt = frameDt(t);
+    var hipAng = [], legDir = [], legLen = [], shW = [];
+    for (var i = 0; i < n; i++) {
+      hipAng.push(NaN); legDir.push(NaN); legLen.push(NaN); shW.push(NaN);
+      var p = Q[i];
+      if (!p) continue;
+      var sB = p[R.B.s], sD = p[R.D.s], hB = p[R.B.h], hD = p[R.D.h];
+      if (sB && sD) shW[i] = dist(sB, sD);
+      if (hB && hD) {
+        var dx = hB.x - hD.x, dy = hB.y - hD.y;
+        if (dx < 0) { dx = -dx; dy = -dy; }
+        hipAng[i] = Math.atan2(dy, dx);
+        var aB = p[R.B.a], aD = p[R.D.a];
+        if (aB && aD) {
+          var hm = mid(hB, hD), am = mid(aB, aD);
+          legDir[i] = Math.atan2(hm.y - am.y, hm.x - am.x);
+          legLen[i] = dist(hm, am);
+        }
+      }
+    }
+    var hipMed = median(hipAng), legMed = median(legDir);
+    var nHip = nums(hipAng).length, nLeg = nums(legDir).length;
+    var useLeg = nHip > 0 && nLeg / nHip >= 0.6;
+    var roll = [];
+    for (i = 0; i < n; i++) {
+      var r = NaN;
+      if (useLeg && isNum(legDir[i])) r = hipMed + (legDir[i] - legMed);
+      else {
+        var win = nums(hipAng.slice(Math.max(0, i - 2), i + 3));
+        if (win.length) r = median(win);
+        else if (isNum(hipMed)) r = hipMed;
+      }
+      roll.push(r);
+    }
+    // 単位 W：脚が見えていれば「脚の長さ × 肩幅／脚の長さの中央値」（カメラの寄り引きに毎フレーム追従し、
+    // 肩幅の検出ノイズの影響を受けにくい）。脚が見えない場合は肩幅の移動中央値。
+    var W;
+    var ratio = median(shW.map(function (w, k) { return w / legLen[k]; }));
+    if (useLeg && isNum(ratio) && ratio > 0) {
+      var Wfb = rollingMedian(t, shW, CFG.scaleWinSec);
+      W = legLen.map(function (L, k) { return isNum(L) ? L * ratio : Wfb[k]; });
+    } else {
+      W = rollingMedian(t, shW, CFG.scaleWinSec);
+    }
+
+    var keys = { sB: R.B.s, sD: R.D.s, eB: R.B.e, eD: R.D.e, wB: R.B.w, wD: R.D.w, hB: R.B.h, hD: R.D.h, earB: R.B.ear, earD: R.D.ear };
+    var S = { H: [] };
+    Object.keys(keys).forEach(function (k) { S[k] = []; });
+    var valid = [];
+    for (i = 0; i < n; i++) {
+      var q = Q[i];
+      var ok = !!(q && q[R.B.s] && q[R.D.s] && isNum(W[i]) && W[i] > 1e-6 && isNum(roll[i]));
+      valid.push(ok);
+      if (!ok) { Object.keys(S).forEach(function (k) { S[k].push(null); }); continue; }
+      var O = mid(q[R.B.s], q[R.D.s]), c = Math.cos(roll[i]), s = Math.sin(roll[i]), w = W[i];
+      var tf = function (pt) {
+        if (!pt) return null;
+        var ddx = pt.x - O.x, ddy = pt.y - O.y;
+        return { u: (ddx * c + ddy * s) / w, v: (-ddx * s + ddy * c) / w };
+      };
+      Object.keys(keys).forEach(function (k) { S[k].push(tf(q[keys[k]])); });
+      S.H.push(tf(headRefImg(q)));
+    }
+    Object.keys(S).forEach(function (k) { S[k] = median3(S[k]); });
+    return { n: n, dt: dt, W: W, roll: roll, S: S, valid: valid, rollSource: useLeg ? 'legs' : 'hips' };
+  }
+
+  /* ---------- 4. フェーズ検出（research.md §4） ---------- */
+  function findRuns(mask, t, maxGap, minSec) {
+    var runs = [], s = -1, lastTrue = -1;
+    for (var i = 0; i <= mask.length; i++) {
+      if (i < mask.length && mask[i]) {
+        if (s < 0) s = i;
+        lastTrue = i;
+      } else if (s >= 0 && (i === mask.length || i - lastTrue > maxGap)) {
+        if (t[lastTrue] - t[s] >= minSec - 1e-9) runs.push({ s: s, e: lastTrue });
+        s = -1;
+      }
+    }
+    return runs;
+  }
+
+  function detectPhases(t, B) {
+    var S = B.S, n = t.length, dt = B.dt, i;
+    var dDraw = [], span = [], hBow = [], speed = [];
+    for (i = 0; i < n; i++) {
+      dDraw.push(S.wD[i] && S.H[i] ? bdist(S.wD[i], S.H[i]) : NaN);
+      span.push(S.wB[i] && S.wD[i] ? bdist(S.wB[i], S.wD[i]) : NaN);
+      hBow.push(S.sB[i] && S.wB[i] ? S.sB[i].v - S.wB[i].v : NaN);
+    }
+    // 顔に対する引き手首の位置を 5 フレーム移動平均し、±2 フレームの差分で速度を求める（検出ノイズ対策）
+    var relS = [];
+    for (i = 0; i < n; i++) {
+      var su = 0, sv = 0, c = 0;
+      for (var j = Math.max(0, i - 2); j <= Math.min(n - 1, i + 2); j++) {
+        if (S.wD[j] && S.H[j]) { su += S.wD[j].u - S.H[j].u; sv += S.wD[j].v - S.H[j].v; c++; }
+      }
+      relS.push(c >= 3 ? { u: su / c, v: sv / c } : null);
+    }
+    for (i = 0; i < n; i++) {
+      var a = i - 2, b = i + 2, sp = NaN;
+      if (a >= 0 && b < n && relS[a] && relS[b]) sp = bdist(relS[b], relS[a]) / (t[b] - t[a]);
+      speed.push(sp);
+    }
+    var sig = { dDraw: dDraw, span: span, hBow: hBow, speed: speed };
+    var dMin = quantile(dDraw, 0.05);
+    if (!(dMin < CFG.nearMax)) return { ok: false, code: 'no-full-draw', sig: sig };
+    var dLow = Math.min(dMin + CFG.nearMargin, CFG.nearMax);
+    // 両手首間距離の基準は「引き手が顔の近くにあるフレーム」に限って求める
+    // （フォロースルーでは引き手が後ろへ流れて、フルドローより手首間が開くため）
+    var spanRef = quantile(span.filter(function (x, k) { return dDraw[k] <= dLow; }), 0.95);
+    if (!(spanRef > CFG.spanMin)) return { ok: false, code: 'no-full-draw', sig: sig };
+    var spanHigh = Math.max(spanRef * CFG.spanFrac, CFG.spanMin);
+    var mask = dDraw.map(function (d, k) { return d <= dLow && span[k] >= spanHigh; });
+    var runs = findRuns(mask, t, 2, CFG.minRunSec);
+    if (!runs.length) return { ok: false, code: 'no-full-draw', sig: sig };
+
+    var searchStart = 0, lastCode = 'no-release', skipped = [];
+    for (var r = 0; r < runs.length; r++) {
+      var res = analyzeRun(runs[r], searchStart);
+      if (res.ok) { res.sig = sig; res.skipped = skipped; return res; }
+      lastCode = res.code;
+      skipped.push({ code: res.code, t0: t[runs[r].s], t1: t[runs[r].e] });
+      searchStart = runs[r].e + 1;
+    }
+    return { ok: false, code: lastCode, sig: sig };
+
+    function analyzeRun(run, ws0) {
+      var k, dRunMin = Infinity;
+      for (k = run.s; k <= run.e; k++) if (isNum(dDraw[k]) && dDraw[k] < dRunMin) dRunMin = dDraw[k];
+      var anchor = -1, holdN = Math.max(1, Math.round(CFG.anchorHoldSec / dt));
+      for (k = run.s; k <= run.e && anchor < 0; k++) {
+        if (!(dDraw[k] <= dRunMin + CFG.anchorNear) || !(speed[k] < CFG.anchorSpeed)) continue;
+        var stable = true;
+        for (var q = k; q <= Math.min(run.e, k + holdN); q++) if (isNum(speed[q]) && speed[q] >= CFG.anchorHoldSpeed) { stable = false; break; }
+        if (stable) anchor = k;
+      }
+      if (anchor < 0) for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear && speed[k] < CFG.anchorHoldSpeed) { anchor = k; break; }
+      if (anchor < 0) for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear) { anchor = k; break; }
+      if (anchor < 0) return { ok: false, code: 'no-full-draw' };
+
+      var aimD = median(dDraw.slice(anchor, run.e + 1));
+      var scanEnd = Math.min(n - 1, run.e + Math.round(0.6 / dt));
+      var release = -1, method = null;
+      for (k = anchor + 1; k <= scanEnd; k++) {
+        var p0 = S.wD[k - 1], p1 = S.wD[k];
+        if (!p0 || !p1) continue;
+        var du2 = p1.u - p0.u, dv2 = p1.v - p0.v;
+        var v2 = hyp(du2, dv2) / (t[k] - t[k - 1]);
+        if (v2 >= CFG.releaseSpeed && dDraw[k] > dDraw[k - 1] && du2 < CFG.releaseFwdMax) {
+          var j = Math.min(k + 1, n - 1);
+          if (j === k || dDraw[j] > aimD + CFG.releaseAway) { release = k - 1; method = 'speed'; break; }
+        }
+      }
+      if (release < 0) {
+        for (k = anchor + 1; k <= scanEnd; k++) {
+          if (dDraw[k] > aimD + CFG.fallbackAway) {
+            var fw = S.wD[k] && S.wD[anchor] ? S.wD[k].u - S.wD[anchor].u : 0;
+            if (fw > CFG.letdownFwd) return { ok: false, code: 'letdown' };
+            release = k - 1; method = 'distance'; break;
+          }
+        }
+      }
+      if (release < 0) return { ok: false, code: 'no-release' };
+      // 動きが 2 フレームにまたがる場合に備え、動き始める直前の静止フレームまで遡る
+      while (release - 1 > anchor && S.wD[release] && S.wD[release - 1] &&
+        bdist(S.wD[release], S.wD[release - 1]) / (t[release] - t[release - 1]) >= CFG.releaseOnset) release--;
+      if (release < anchor) release = anchor;
+
+      // 遡ってセットアップ（弓手首の上昇）→ ドローイング開始（両手首間距離の伸び始め）を探す
+      var ws = Math.max(ws0, idxNear(t, t[anchor] - CFG.lookBackSec));
+      var hA = median(hBow.slice(anchor, release + 1));
+      var hRest = Infinity;
+      for (k = ws; k <= anchor; k++) if (isNum(hBow[k]) && hBow[k] < hRest) hRest = hBow[k];
+      var setupStart = -1, setupPeak = -1;
+      if (isNum(hA) && hA - hRest >= CFG.setupRiseMin) {
+        var l50 = hRest + 0.5 * (hA - hRest);
+        for (k = anchor; k >= ws; k--) if (hBow[k] <= l50) { setupStart = Math.min(k + 1, anchor); break; }
+        if (setupStart >= 0) {
+          var l90 = hRest + 0.9 * (hA - hRest);
+          for (k = setupStart; k <= anchor; k++) if (hBow[k] >= l90) { setupPeak = k; break; }
+        }
+      }
+      // セットアップ中も両手は離れていくため、ドローイング開始はセットアップのピーク以降で探す
+      var dw = setupPeak >= 0 ? setupPeak : ws;
+      var spanA = median(span.slice(anchor, release + 1));
+      var spanMinB = Infinity;
+      for (k = dw; k <= anchor; k++) if (isNum(span[k]) && span[k] < spanMinB) spanMinB = span[k];
+      var drawStart = -1;
+      if (isNum(spanA) && spanA - spanMinB >= CFG.drawRiseMin) {
+        var lvl = spanMinB + 0.1 * (spanA - spanMinB);
+        for (k = anchor; k >= dw; k--) if (span[k] <= lvl) { drawStart = k; break; }
+      }
+      var endT = t[n - 1];
+      var followEnd = idxNear(t, Math.min(endT, t[release] + 1.0));
+      return {
+        ok: true,
+        setupStart: setupStart, setupPeak: setupPeak, drawStart: drawStart,
+        anchor: anchor, release: release, followEnd: followEnd,
+        releaseMethod: method,
+        followAvail: endT - t[release]
+      };
+    }
+  }
+
+  /* ---------- 5. カメラ揺れの推定（research.md §5） ---------- */
+  function estimateShake(t, Q, R, B, i0, i1) {
+    var half = CFG.shakeWinSec / 2, pts = [];
+    for (var i = i0; i <= i1; i++) {
+      var p = Q[i];
+      pts.push(p && p[R.B.h] && p[R.D.h] && isNum(B.W[i]) ? mid(p[R.B.h], p[R.D.h]) : null);
+    }
+    var sq = [], tt = t.slice(i0, i1 + 1);
+    for (var k = 0; k < pts.length; k++) {
+      if (!pts[k]) continue;
+      var sx = 0, sy = 0, c = 0;
+      for (var j = 0; j < pts.length; j++) {
+        if (pts[j] && Math.abs(tt[j] - tt[k]) <= half + 1e-9) { sx += pts[j].x; sy += pts[j].y; c++; }
+      }
+      if (c < 3) continue;
+      var w = B.W[i0 + k];
+      sq.push(Math.pow(hyp(pts[k].x - sx / c, pts[k].y - sy / c) / w, 2));
+    }
+    var rms = sq.length ? Math.sqrt(mean(sq)) : NaN;
+    return { rms: rms, high: isNum(rms) && rms > CFG.shakeThreshold, threshold: CFG.shakeThreshold, samples: sq.length };
+  }
+
+  /* ---------- 6. 指標の定義（research.md §3 対応表） ---------- */
+  function fx(x, d) { return (x < 0 ? '−' : '') + Math.abs(x).toFixed(d === undefined ? 3 : d); }
+  function fxs(x, d) { return (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(x).toFixed(d === undefined ? 3 : d); }
+  function cm(x) { return '約' + (Math.abs(x) * CFG.shoulderCm).toFixed(1) + 'cm'; }
+
+  var DEFS = [
+    {
+      id: 'M1', name: '弓肩の上がり', phase: 'フルドロー', thr: 0.06, scale: 0.06, weight: 1,
+      joints: ['B.s', 'D.s'], guide: 'shoulders',
+      title: function () { return '弓側の肩が上がる傾向があります'; },
+      checkpoint: 'フルドローで弓側の肩は低く、両肩のラインは水平に保つ。',
+      why: 'World Archery（旧 FITA）コーチングマニュアルでは、押し手の肩は矢のラインより低くあるべきで、肩が上がると背中の力（バックテンション）が使えず、エイミング中に肩がさらに上がり続けるとしています。Naomi Folkard 選手も「肩は終始ニュートラルな高さに。上げも下げもしない」と解説しています。',
+      source: 'World Archery／FITA コーチングマニュアル、Bow International（Naomi Folkard）',
+      cue: '弓側の肩をポケットに入れるように下げて、鎖骨を肋骨にのせる',
+      drills: ['壁押しドリル（ドア枠に弓腕を押し当て、肩甲骨を下げたまま押す感覚を確認）', '軽いポンドでの素引き'],
+      good: 'フルドロー中、弓側の肩が上がらず、両肩のラインがほぼ水平に保たれています。'
+    },
+    {
+      id: 'M2', name: '引き肘のライン', phase: 'フルドロー', thr: null, lo: -0.05, hi: 0.15, scale: 0.05, weight: 1,
+      joints: ['D.e', 'B.s', 'B.w'], guide: 'bowline',
+      title: function (m) { return m.variant === 'high' ? '引き肘が矢のラインより上がりすぎる傾向があります' : '引き肘が矢のラインより下がる傾向があります'; },
+      checkpoint: '引き肘は矢のライン上か、やや上にある。',
+      why: 'KSL／NTS では、引き肘は矢と一直線か、やや上を向くとしています。Dr James Park（Bow International）は、引き肘が力のライン（ドローフォースライン）上にあれば腕の筋肉を使わず背中の大きな筋肉だけで保持でき、ラインから外れると引き手に横方向の力がかかると解説しています。',
+      source: 'USA Archery NTS（KiSik Lee）、FITA コーチングマニュアル、Bow International（Dr James Park）',
+      cue: '肘で引く。肘を矢のラインにのせる',
+      drills: ['LAN2 意識（上腕三頭筋の裏の点を意識して引く）', 'ゴムバンドで肘の軌道練習', '鏡で肘の高さを確認'],
+      good: '引き肘が矢のライン上にきれいにのっています。'
+    },
+    {
+      id: 'M3', name: 'アンカーの安定性', phase: 'エイミング', thr: 0.04, scale: 0.04, weight: 1,
+      joints: ['D.w', 'H'], guide: 'anchor',
+      title: function () { return 'エイミング中にアンカー位置が動いているようです'; },
+      checkpoint: 'アンカーは毎回同じ場所に当て、保持中も動かさない。',
+      why: 'FITA コーチングマニュアルでは、アンカー（ドローレファレンスポイント）をすべての基本技術の中で最も重要としています。NTS では顎の下・頬骨の下に人差し指の第1関節を当て、手の甲で下顎を包み、手と顎の間に隙間を作らないことを求めます。',
+      source: 'FITA コーチングマニュアル、USA Archery NTS',
+      cue: '毎回同じ場所に、顎の骨に当てる',
+      drills: ['近射でアンカー確認（的を見ずにアンカーの感覚だけに集中）', 'ミラー練習'],
+      good: 'エイミング中、引き手と顔の位置関係がほとんど変わらず、アンカーが安定しています。'
+    },
+    {
+      id: 'M4', name: 'クリーピング', phase: 'エイミング', thr: 0.03, scale: 0.03, weight: 1,
+      joints: ['D.w'], guide: 'path',
+      title: function () { return 'エイミング中に引き手が前へ戻っているようです（クリーピング）'; },
+      checkpoint: 'フルドローで引き手が前へクリープしない。',
+      why: 'World Archery コーチングマニュアルの着弾分析では、矢が下に集まるときはフルドローで前にクリープしていないかを確認します。引き手が前に出るとドローレングスと矢速が落ち、低く不安定な着弾になりやすくなります（ArcheryBuddy）。',
+      source: 'World Archery Coach’s Manual、ArcheryBuddy',
+      cue: '背中で引き続けながら狙う。止まらず、押し切る',
+      drills: ['クリッカー練習', 'ゴムバンドで背中の締めを感じる練習', 'エクスパンション意識の素引き'],
+      good: 'エイミング中に引き手が前へ戻らず、引き尺を保てています。'
+    },
+    {
+      id: 'M5', name: 'コラプシング', phase: 'エイミング', thr: 0.04, scale: 0.04, weight: 1,
+      joints: ['D.e'], guide: 'path',
+      title: function () { return 'エイミング中に引き肘が下がっているようです（コラプシング）'; },
+      checkpoint: 'エイミング中に引き肘を下げず、ドローレングスを保つ。',
+      why: 'コラプシングは引き腕がつぶれ、肘が下がってドローレングスが短くなる動きで、主な原因はポンドが重すぎることや疲労です（ArcheryBuddy）。肘が下がるとアンカーが不安定になり、矢の飛びが乱れます（BowBasics）。',
+      source: 'ArcheryBuddy、BowBasics',
+      cue: '肘の高さを保ったまま、背中で支える',
+      drills: ['ポンドを一時的に下げる', '背筋・肩甲骨まわりの筋トレ', 'バンド練習'],
+      good: 'エイミング中も引き肘の高さが保たれています。'
+    },
+    {
+      id: 'M6', name: 'プラッキング', phase: 'リリース', thr: 0.5, scale: 0.5, weight: 1,
+      joints: ['D.w'], guide: 'path',
+      title: function () { return 'リリースで引き手が顔から離れる方向へ動いている可能性があります（プラッキング疑い）'; },
+      checkpoint: 'リリースで引き手は横・外へはじかず、顔に沿ってまっすぐ後ろへ流れる。',
+      why: 'プラッキングは、リリースで指を外向きに開いたり手を顔から引き離したりして、引き手が横・外へ動くことで、矢が左右にぶれる原因になります。引き手は首・耳の近くで終わるよう、顔に沿って後ろへ流すのが直し方です（ArcheryBuddy）。BowBasics は「指を完全にリラックスさせ、弦が指の間をすり抜けるイメージ」を勧めています。',
+      source: 'ArcheryBuddy、BowBasics',
+      cue: '指の力を抜いて、弦に指を押し出させる',
+      drills: ['ブランクベイル（2〜5 m、的紙なしでリリースの質だけに集中）', '目を閉じたリリース練習', '鏡・動画で確認'],
+      good: 'リリース直後、引き手が顔から離れず、後方へまっすぐ抜けています。'
+    },
+    {
+      id: 'M7', name: '弓腕の残身', phase: 'フォロースルー', thr: 0.05, scale: 0.05, weight: 1,
+      joints: ['B.w'], guide: 'path',
+      title: function () { return 'リリース後に弓腕が下がっているようです'; },
+      checkpoint: 'リリース後も弓腕は的に向けたまま残す。',
+      why: 'NTS では、リリース後もすべて静止し、両手首と肩を結ぶ仮想の直線（Barrel of the Gun）を的に向け続けます。弓腕がリリース前後に下がると矢が低く入りやすく、初心者に最も多いミスの一つとされています（ArcheryBuddy）。',
+      source: 'USA Archery NTS、ArcheryBuddy',
+      cue: '矢が的に届くまで弓腕を残す（残身）',
+      drills: ['残身 2 秒キープ', 'スリングで弓を自然に落とす感覚をつかむ練習'],
+      good: 'リリース後も弓腕が下がらず、的に向けたまま残せています。'
+    },
+    {
+      id: 'M8', name: '引き手のフォロースルー', phase: 'フォロースルー', thr: 0.02, scale: 0.05, weight: 1, lower: true,
+      joints: ['D.w'], guide: 'path',
+      title: function () { return 'リリース後、引き手が後方へ流れていないようです'; },
+      checkpoint: 'リリース後、引き手は首に沿って後方へ流れ、肩甲骨が回り続ける。',
+      why: 'KSL／NTS では、フォロースルーはリリースの自然な結果で、背中の筋肉が働き続けていれば引き手は矢の進行方向と反対に、首の後ろへまっすぐ流れるとしています。リリース後の引き手は、アンカー位置より後ろ、首・耳の近くで終わるのが目安です（ArcheryBuddy）。',
+      source: 'USA Archery NTS（KiSik Lee）、ArcheryBuddy',
+      cue: 'リリース後も背中で引き続け、手を首の後ろへ流す',
+      drills: ['バンドでフォロースルー練習', '動画で引き手の軌道を確認'],
+      good: 'リリース後、引き手がアンカー位置から首の後ろ方向へしっかり流れています。'
+    },
+    {
+      id: 'M9', name: '体幹の傾き', phase: 'フルドロー', thr: 8, scale: 8, weight: 1,
+      joints: ['B.s', 'D.s', 'B.h', 'D.h'], guide: 'trunk',
+      title: function (m) { return m.variant === 'toward' ? '体幹が的の方向へ傾いているようです' : '体幹が的と反対方向へ傾いているようです'; },
+      checkpoint: '腰で体を曲げず、体幹はまっすぐ、重心は足の真ん中。',
+      why: 'FITA コーチングマニュアルでは、ドローイング時に腰で体を曲げないことを求めています。NTS でも体幹を締め、腰を肋骨の下に収め、頭と首を背骨の上にそろえます。',
+      source: 'FITA コーチングマニュアル、USA Archery NTS',
+      cue: '腰から上をまっすぐに、頭のてっぺんを上に引く',
+      drills: ['壁を背にした素引き', '体幹トレーニング'],
+      good: '腰から上がまっすぐで、体幹の傾きがほとんどありません。'
+    },
+    {
+      id: 'M10', name: 'セットアップの両手の連動', phase: 'セットアップ', thr: 0.12, scale: 0.12, weight: 0.5,
+      joints: ['B.w', 'D.w'], guide: 'wrists',
+      title: function () { return 'セットアップで両手の高さがそろっていないようです'; },
+      checkpoint: 'セットアップでは両手をヒンジの動きで一緒に上げる。',
+      why: 'NTS にもとづく解説では、セットアップで両手をヒンジの動きで一緒に上げ、肩は低くリラックスさせたままにします（Archery Fundamentals）。Online Archery Academy も、両手を一緒に上げ、引き肘は引き手よりやや上に保つとしています。この項目は参考指標として優先度を下げて扱います。',
+      source: 'Archery Fundamentals 2nd Ed.、Online Archery Academy',
+      cue: '両手を一緒に、ヒンジで上げる',
+      drills: ['素引きで両手の連動を確認', '鏡でセットアップをチェック'],
+      good: 'セットアップで両手をそろえて上げられています。'
+    },
+    {
+      id: 'M11', name: 'エイミング時間', phase: 'エイミング', thr: 5, scale: 5, weight: 1,
+      joints: ['D.w'], guide: null,
+      title: function () { return 'エイミング時間が長めです'; },
+      checkpoint: 'エイミングは 1〜3 秒が目安。',
+      why: 'NTS ではエイミングは 3 秒までが目安です。長時間の保持はブレやコラプシングの原因になります。',
+      source: 'USA Archery NTS',
+      cue: '3 秒で区切る。狙い続けず、背中で押し切る',
+      drills: ['クリッカー＋リズム練習', 'タイマー練習'],
+      good: 'エイミング時間が NTS の目安（1〜3 秒）に近い長さです。'
+    },
+    {
+      id: 'M12', name: '頭の傾き', phase: 'エイミング', thr: 10, scale: 10, weight: 1,
+      joints: ['B.ear', 'D.ear'], guide: 'ears',
+      title: function (m) { return m.variant === 'draw' ? '頭が引き手側へ傾いているようです' : '頭が弓側へ傾いているようです'; },
+      checkpoint: '頭はまっすぐ保ち、弦側に傾けない。',
+      why: 'World Archery コーチングマニュアルの着弾分析では、矢が左右にずれるときは頭が弦側に傾いていないか（leaning into the string）を確認します。',
+      source: 'World Archery Coach’s Manual',
+      cue: '頭はまっすぐ、顎を引かずに弦に当てる',
+      drills: ['ミラー練習', '帽子のつばを水平に保つ意識'],
+      good: '頭が肩のラインに対してまっすぐ保たれています。'
+    }
+  ];
+  var DEF_BY_ID = {};
+  DEFS.forEach(function (d) { DEF_BY_ID[d.id] = d; });
+
+  var NA_TEXT = {
+    'missing': '必要な関節を十分に検出できなかったため測定できません。',
+    'no-setup': '動画にセットアップ（弓を上げる動き）が映っていないため測定できません。',
+    'short-aim': 'エイミングが短く、測定に必要なフレームが足りません。',
+    'no-follow': 'リリース後の映像が足りないため測定できません（リリース後 1 秒以上撮影してください）。',
+    'ears': '頭が横を向いて両耳が重なって見えるため、耳のラインの角度を安定して測れません。',
+    'no-motion': 'リリース直後に引き手がほとんど動いておらず、方向の比率を計算できません（引き手のフォロースルーを参照）。'
+  };
+
+  /* ---------- 7. 指標の算出 ---------- */
+  function computeMetrics(t, B, ph) {
+    var S = B.S, dt = B.dt, n = t.length;
+    var a0 = ph.anchor, r = ph.release;
+    var aim = seq(a0, r);
+    var out = {};
+    function na(code) { return { na: code }; }
+    function at(i) { return isNum(t[i]) ? t[i] : null; }
+    function avgAround(arr, idxs, fn) { return mean(idxs.filter(function (k) { return k >= 0 && k < n && arr[k]; }).map(function (k) { return fn(arr[k], k); })); }
+    var edgeN = Math.max(1, Math.round(CFG.aimEdgeSec / dt));
+    if (aim.length < 2 * edgeN) edgeN = Math.max(1, Math.floor(aim.length / 2));
+    var head = aim.slice(0, edgeN), tail = aim.slice(aim.length - edgeN);
+    var aimRange = [at(a0), at(r)];
+
+    // M1 弓肩の上がり：raise = (y_DS肩 − y_BS肩) / W をフルドロー期間で平均
+    (function () {
+      var vals = [], best = -Infinity, bi = a0;
+      aim.forEach(function (i) {
+        if (!S.sB[i] || !S.sD[i]) return;
+        var x = S.sD[i].v - S.sB[i].v;
+        vals.push(x);
+        if (x > best) { best = x; bi = i; }
+      });
+      out.M1 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
+    })();
+
+    // M2 引き肘のライン：弓腕ライン（BS肩→BS手首）からの引き肘の垂直距離（上が正）
+    function elbowH(i) {
+      var sB = S.sB[i], wB = S.wB[i], eD = S.eD[i];
+      if (!sB || !wB || !eD) return NaN;
+      var dx = wB.u - sB.u, dy = wB.v - sB.v, L = hyp(dx, dy);
+      if (L < 1e-6) return NaN;
+      return (eD.u - sB.u) * (dy / L) + (eD.v - sB.v) * (-dx / L);
+    }
+    (function () {
+      var vals = [], best = -1, bi = a0;
+      aim.forEach(function (i) {
+        var h = elbowH(i);
+        if (!isNum(h)) return;
+        vals.push(h);
+        if (Math.abs(h - 0.04) > best) { best = Math.abs(h - 0.04); bi = i; }
+      });
+      out.M2 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
+    })();
+
+    // M3 アンカーの安定性：引き手首〜頭部基準点の距離の範囲（0.3 秒移動平均後）
+    (function () {
+      var d = aim.map(function (i) { return S.wD[i] && S.H[i] ? bdist(S.wD[i], S.H[i]) : NaN; });
+      if (nums(d).length < CFG.minAimFrames) { out.M3 = na(aim.length < CFG.minAimFrames ? 'short-aim' : 'missing'); return; }
+      var half = Math.max(1, Math.round(CFG.aimSmoothSec / 2 / dt));
+      var sm = d.map(function (_, k) { return mean(d.slice(Math.max(0, k - half), k + half + 1)); });
+      var vals = nums(sm), mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals), md = median(vals);
+      var bi = a0, best = -1;
+      sm.forEach(function (x, k) { if (isNum(x) && Math.abs(x - md) > best) { best = Math.abs(x - md); bi = aim[k]; } });
+      out.M3 = { value: mx - mn, at: at(bi), range: aimRange, frame: bi, extra: { mean: md } };
+    })();
+
+    // M4 クリーピング：アンカー到達時から的の方向への引き手首の移動（頭部基準点に対する相対位置）
+    (function () {
+      if (aim.length < CFG.minAimFrames) { out.M4 = na('short-aim'); return; }
+      var f = function (p, k) { return S.H[k] ? p.u - S.H[k].u : NaN; };
+      var c0 = avgAround(S.wD, head, f), c1 = avgAround(S.wD, tail, f);
+      out.M4 = isNum(c0) && isNum(c1) ? { value: c1 - c0, at: at(r), range: aimRange, frame: r, pathRange: [a0, r] } : na('missing');
+    })();
+
+    // M5 コラプシング：肩を基準にした引き肘の高さの低下量
+    (function () {
+      if (aim.length < CFG.minAimFrames) { out.M5 = na('short-aim'); return; }
+      var f = function (p, k) { return S.sD[k] ? p.v - S.sD[k].v : NaN; };
+      var y0 = avgAround(S.eD, head, f), y1 = avgAround(S.eD, tail, f);
+      out.M5 = isNum(y0) && isNum(y1) ? { value: y1 - y0, at: at(r), range: aimRange, frame: r, pathRange: [a0, r] } : na('missing');
+    })();
+
+    var endT = t[n - 1];
+    function afterIdx(sec) {
+      if (endT - t[r] < sec - CFG.followTol) return -1;
+      var k = idxNear(t, t[r] + sec);
+      return Math.abs(t[k] - (t[r] + sec)) <= CFG.followTol + 1e-9 ? k : -1;
+    }
+
+    // M6 プラッキング：リリース直後 0.3 秒の引き手首の変位を後方成分と外側成分に分解
+    (function () {
+      var k = afterIdx(CFG.pluckSec);
+      if (k < 0) { out.M6 = na('no-follow'); return; }
+      var p0 = S.wD[r], p1 = S.wD[k], sB = S.sB[r], sD = S.sD[r];
+      if (!p0 || !p1 || !sB || !sD) { out.M6 = na('missing'); return; }
+      var ax = sB.u - sD.u, ay = sB.v - sD.v, L = hyp(ax, ay);
+      ax /= L; ay /= L;
+      var du = p1.u - p0.u, dv = p1.v - p0.v;
+      var back = -(du * ax + dv * ay);
+      var outward = Math.abs(du * -ay + dv * ax);
+      var ex = { back: back, out: outward };
+      if (back < CFG.pluckMinBack) {
+        if (outward < CFG.pluckMinOut) { out.M6 = na('no-motion'); return; }
+        out.M6 = { value: CFG.pluckRatioCap, capped: true, at: at(r), range: [at(r), at(k)], frame: r, pathRange: [r, k], extra: ex };
+        return;
+      }
+      var ratio = Math.min(outward / back, CFG.pluckRatioCap);
+      out.M6 = { value: ratio, at: at(r), range: [at(r), at(k)], frame: r, pathRange: [r, k], extra: ex };
+    })();
+
+    // M7 弓腕の残身：リリース時点と 0.5 秒後の弓手首の高さの差（下がりが正）
+    var k5 = afterIdx(CFG.followSec);
+    (function () {
+      if (k5 < 0) { out.M7 = na('no-follow'); return; }
+      var f = function (p) { return p.v; };
+      var y0 = avgAround(S.wB, [r - 1, r], f), y1 = avgAround(S.wB, [k5 - 1, k5, k5 + 1], f);
+      out.M7 = isNum(y0) && isNum(y1) ? { value: y1 - y0, at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5] } : na('missing');
+    })();
+
+    // M8 引き手のフォロースルー：アンカー位置から的と逆方向への変位（0.5 秒後）
+    (function () {
+      if (k5 < 0) { out.M8 = na('no-follow'); return; }
+      var u0 = avgAround(S.wD, tail, function (p) { return p.u; });
+      var u1 = avgAround(S.wD, [k5 - 1, k5, k5 + 1], function (p) { return p.u; });
+      if (!isNum(u0) || !isNum(u1)) { out.M8 = na('missing'); return; }
+      var dh = S.wD[k5] && S.H[k5] ? bdist(S.wD[k5], S.H[k5]) : NaN;
+      out.M8 = { value: -(u1 - u0), at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5], extra: { headDist: dh } };
+    })();
+
+    // M9 体幹の傾き：腰中点→肩中点のラインと鉛直（腰ラインに垂直）のなす角。的の方向が正
+    (function () {
+      var vals = [], best = -1, bi = a0;
+      aim.forEach(function (i) {
+        if (!S.hB[i] || !S.hD[i]) return;
+        var hu = (S.hB[i].u + S.hD[i].u) / 2, hv = (S.hB[i].v + S.hD[i].v) / 2;
+        var a = deg(Math.atan2(-hu, hv));
+        vals.push(a);
+        if (Math.abs(a) > best) { best = Math.abs(a); bi = i; }
+      });
+      out.M9 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
+    })();
+
+    // M10 セットアップの両手の連動：弓手首が肩の高さに達した時点の両手首の高さの差
+    (function () {
+      var p = ph.setupPeak;
+      if (p < 0) { out.M10 = na('no-setup'); return; }
+      var idx = [p - 1, p, p + 1].filter(function (k) { return k >= 0 && k < n && S.wB[k] && S.wD[k]; });
+      if (!idx.length) { out.M10 = na('missing'); return; }
+      var v = mean(idx.map(function (k) { return Math.abs(S.wB[k].v - S.wD[k].v); }));
+      out.M10 = { value: v, at: at(p), range: [at(p), at(p)], frame: p };
+    })();
+
+    // M11 エイミング時間
+    out.M11 = { value: t[r] - t[a0], at: at(a0), range: aimRange, frame: a0 };
+
+    // M12 頭の傾き：両耳ラインと肩ラインのなす角（頭が弓側に傾く方向が正）
+    (function () {
+      var sep = [], vals = [], best = -1, bi = a0;
+      aim.forEach(function (i) {
+        var eb = S.earB[i], ed = S.earD[i], sb = S.sB[i], sd = S.sD[i];
+        if (!eb || !ed || !sb || !sd) return;
+        var Eu = eb.u - ed.u, Ev = eb.v - ed.v;
+        sep.push(Eu);
+        var angS = Math.atan2(-(sb.v - sd.v), sb.u - sd.u), angE = Math.atan2(-Ev, Eu);
+        var a = deg(angS - angE);
+        vals.push(a);
+        if (Math.abs(a) > best) { best = Math.abs(a); bi = i; }
+      });
+      if (!vals.length) { out.M12 = na('missing'); return; }
+      var ms = median(sep);
+      if (!(ms >= CFG.earMinSep)) { out.M12 = na('ears'); out.M12.extra = { sep: ms }; return; }
+      out.M12 = { value: mean(vals), at: at(bi), range: aimRange, frame: bi, extra: { sep: ms } };
+    })();
+
+    return out;
+  }
+
+  /* ---------- 8. ルール評価・表示用テキスト ---------- */
+  function evaluate(def, raw) {
+    var m = {
+      id: def.id, name: def.name, phase: def.phase, def: def,
+      status: 'na', value: null, variant: null, score: 0, closeness: Infinity,
+      at: null, range: null, frame: -1, pathRange: null, extra: raw ? raw.extra || null : null,
+      valueText: '', thresholdText: '', detailText: '', naReason: null, gauge: null
+    };
+    if (!raw || raw.na) {
+      m.naReason = raw ? raw.na : 'missing';
+      m.naText = NA_TEXT[m.naReason] || NA_TEXT.missing;
+      m.thresholdText = thresholdText(def);
+      return m;
+    }
+    var x = raw.value;
+    m.value = x; m.at = raw.at; m.range = raw.range; m.frame = raw.frame; m.pathRange = raw.pathRange || null;
+    var exceed = 0, close = 0;
+    switch (def.id) {
+      case 'M2':
+        if (x < def.lo) { exceed = def.lo - x; m.variant = 'low'; }
+        else if (x > def.hi) { exceed = x - def.hi; m.variant = 'high'; }
+        close = x < 0.04 ? (0.04 - x) / 0.09 : (x - 0.04) / 0.11;
+        break;
+      case 'M8':
+        exceed = Math.max(0, def.thr - x);
+        close = x >= 0.2 ? 0 : (0.2 - x) / 0.18;
+        break;
+      case 'M9':
+        exceed = Math.max(0, Math.abs(x) - def.thr);
+        m.variant = x >= 0 ? 'toward' : 'away';
+        close = Math.abs(x) / def.thr;
+        break;
+      case 'M11':
+        exceed = Math.max(0, x - def.thr);
+        close = Math.abs(x - 2) / (x < 2 ? 1 : 3);
+        break;
+      case 'M12':
+        exceed = Math.max(0, Math.abs(x) - def.thr);
+        m.variant = x >= 0 ? 'bow' : 'draw';
+        close = Math.abs(x) / def.thr;
+        break;
+      default:
+        exceed = Math.max(0, x - def.thr);
+        close = Math.abs(x) / def.thr;
+    }
+    m.status = exceed > 0 ? 'flag' : 'ok';
+    m.score = exceed > 0 ? def.weight * exceed / def.scale : 0;
+    m.closeness = close;
+    describe(m, raw);
+    return m;
+  }
+
+  function thresholdText(def) {
+    switch (def.id) {
+      case 'M2': return '目安 −0.05〜+0.15（理想 0〜+0.08）';
+      case 'M6': return '目安 0.5 以下';
+      case 'M8': return '目安 0.02 以上';
+      case 'M9': return '目安 8° 以下';
+      case 'M11': return '目安 5 秒以下（NTS の目安 1〜3 秒）';
+      case 'M12': return '目安 10° 以下';
+      default: return '目安 ' + def.thr.toFixed(2) + ' 以下';
+    }
+  }
+
+  function describe(m, raw) {
+    var x = m.value, def = m.def;
+    m.thresholdText = thresholdText(def);
+    switch (def.id) {
+      case 'M1':
+        m.valueText = fx(x); m.unitText = '肩幅比（' + cm(x) + (x < 0 ? '、弓肩が低い側' : '') + '）';
+        m.detailText = 'フルドロー中の平均。引き側の肩に対して弓側の肩がどれだけ高いかを、腰のラインを水平の基準にして測定。';
+        m.gauge = { lo: -0.06, hi: 0.18, okLo: -0.06, okHi: 0.06 };
+        break;
+      case 'M2':
+        m.valueText = fxs(x); m.unitText = '肩幅比（' + cm(x) + (x >= 0 ? ' ラインより上' : ' ラインより下') + '）';
+        m.detailText = '弓腕のライン（弓側の肩→弓手首）を矢のラインの近似とし、引き肘がそこからどれだけ離れているかのフルドロー中の平均。';
+        m.gauge = { lo: -0.2, hi: 0.3, okLo: -0.05, okHi: 0.15 };
+        break;
+      case 'M3':
+        m.valueText = fx(x); m.unitText = '肩幅比（' + cm(x) + ' の変動）';
+        m.detailText = 'エイミング中の引き手首と顔（鼻・口）との距離の変動幅（検出ノイズを抑えるため 0.5 秒の移動平均後）。';
+        m.gauge = { lo: 0, hi: 0.12, okLo: 0, okHi: 0.04 };
+        break;
+      case 'M4':
+        m.valueText = fxs(x); m.unitText = '肩幅比（' + cm(x) + (x >= 0 ? ' 的の方向へ' : ' 後方へ') + '）';
+        m.detailText = 'アンカー到達直後とリリース直前の、顔に対する引き手首の位置の差（的の方向が正）。';
+        m.gauge = { lo: -0.06, hi: 0.1, okLo: -0.06, okHi: 0.03 };
+        break;
+      case 'M5':
+        m.valueText = fxs(x); m.unitText = '肩幅比（' + cm(x) + (x >= 0 ? ' 下がり' : ' 上がり') + '）';
+        m.detailText = 'アンカー到達直後とリリース直前の、肩に対する引き肘の高さの差（下がりが正）。';
+        m.gauge = { lo: -0.06, hi: 0.12, okLo: -0.06, okHi: 0.04 };
+        break;
+      case 'M6':
+        m.valueText = raw.capped ? '3.0 以上' : x.toFixed(2); m.unitText = '外側成分／後方成分の比';
+        m.detailText = 'リリース直後 0.3 秒の引き手首の動き：後方 ' + fxs(raw.extra.back) + '・外側 ' + fx(raw.extra.out) + '（肩幅比）。外側＝肩のラインに垂直な方向。';
+        m.gauge = { lo: 0, hi: 1.5, okLo: 0, okHi: 0.5 };
+        break;
+      case 'M7':
+        m.valueText = fxs(x); m.unitText = '肩幅比（' + cm(x) + (x >= 0 ? ' 下がり' : ' 上がり') + '）';
+        m.detailText = 'リリース時点と 0.5 秒後の弓手首の高さの差（下がりが正）。';
+        m.gauge = { lo: -0.05, hi: 0.2, okLo: -0.05, okHi: 0.05 };
+        break;
+      case 'M8':
+        m.valueText = fxs(x); m.unitText = '肩幅比（' + cm(x) + (x >= 0 ? ' 後方へ' : ' 前方へ') + '）';
+        m.detailText = 'アンカー位置から、リリース 0.5 秒後の引き手首までの的と逆方向への移動量' + (raw.extra && isNum(raw.extra.headDist) ? '。0.5 秒後の顔からの距離 ' + fx(raw.extra.headDist, 2) + '（肩幅比）。' : '。');
+        m.gauge = { lo: -0.1, hi: 0.5, okLo: 0.02, okHi: 0.5 };
+        break;
+      case 'M9':
+        m.valueText = Math.abs(x).toFixed(1) + '°'; m.unitText = x >= 0 ? '的の方向へ' : '的と反対方向へ';
+        m.detailText = 'フルドロー中の、腰中点→肩中点のラインと鉛直（腰のラインに垂直な方向）のなす角の平均。';
+        m.gauge = { lo: 0, hi: 20, okLo: 0, okHi: 8, abs: true };
+        break;
+      case 'M10':
+        m.valueText = fx(x); m.unitText = '肩幅比（' + cm(x) + ' の高さの差）';
+        m.detailText = '弓手首が肩の高さに達した時点での、両手首の高さの差。参考指標のため優先度を下げて評価。';
+        m.gauge = { lo: 0, hi: 0.3, okLo: 0, okHi: 0.12 };
+        break;
+      case 'M11':
+        m.valueText = x.toFixed(1) + '秒'; m.unitText = 'アンカー到達からリリースまで';
+        m.detailText = 'フェーズ検出によるアンカー到達からリリースまでの時間。';
+        m.gauge = { lo: 0, hi: 9, okLo: 0, okHi: 5 };
+        break;
+      case 'M12':
+        m.valueText = Math.abs(x).toFixed(1) + '°'; m.unitText = x >= 0 ? '弓側へ' : '引き手側へ';
+        m.detailText = 'エイミング中の、両耳のラインと肩のラインのなす角の平均。';
+        m.gauge = { lo: 0, hi: 25, okLo: 0, okHi: 10, abs: true };
+        break;
+    }
+    if (m.gauge) m.gauge.value = m.gauge.abs ? Math.abs(x) : x;
+  }
+
+  /* ---------- 9. 優先度づけ・良かった点・総合コメント ---------- */
+  function adviceCard(m, shakeHigh) {
+    var def = m.def;
+    return {
+      id: m.id, name: def.name, phase: def.phase,
+      title: def.title(m),
+      evidence: { value: m.valueText, unit: m.unitText, threshold: m.thresholdText, detail: m.detailText, at: m.at, range: m.range, gauge: m.gauge },
+      cue: def.cue, drills: def.drills.slice(), checkpoint: def.checkpoint, why: def.why, source: def.source,
+      note: shakeHigh ? 'カメラの揺れが大きく、この指標は参考値です' : null,
+      score: m.score, joints: def.joints.slice(), guide: def.guide, frame: m.frame, pathRange: m.pathRange
+    };
+  }
+
+  function pickGood(metrics) {
+    var cands = metrics.filter(function (m) { return m.status === 'ok' && isNum(m.closeness); });
+    if (!cands.length) return null;
+    cands.sort(function (a, b) { return a.closeness - b.closeness || DEFS.indexOf(a.def) - DEFS.indexOf(b.def); });
+    var m = cands[0];
+    var text = m.def.good;
+    if (m.id === 'M11') text = 'エイミング時間が ' + m.value.toFixed(1) + ' 秒で、NTS の目安（1〜3 秒）に近い長さです。';
+    return { id: m.id, name: m.name, phase: m.phase, text: text, value: m.valueText, unit: m.unitText, threshold: m.thresholdText, at: m.at, frame: m.frame, pathRange: m.pathRange, joints: m.def.joints.slice(), guide: m.def.guide };
+  }
+
+  function summarize(metrics, flagged, good) {
+    var measured = metrics.filter(function (m) { return m.status !== 'na'; }).length;
+    var naN = metrics.length - measured;
+    var tailNa = naN ? '（' + naN + '項目は撮影条件により測定できませんでした）' : '';
+    if (!flagged.length) {
+      return '測定できた' + measured + '項目は、すべて目安の範囲に収まりました' + tailNa + '。' +
+        (good ? '特に「' + good.name + '」は理想に近い値です。' : '');
+    }
+    var top = flagged[0];
+    return '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超えました' + tailNa + '。' +
+      '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）で、まずはここから見直すのがおすすめです。';
+  }
+
+  var ERRORS = {
+    'too-few-frames': { title: '解析できるフレームが足りません', message: '解析区間が短すぎます。セットアップ前からリリース後 1 秒までを含めて選び直してください。' },
+    'no-person': { title: '射手の骨格を十分に検出できませんでした', message: '人物の骨格を検出できたフレームが少なすぎるため、フェーズを判定できません。' },
+    'no-full-draw': { title: 'フルドロー（アンカー）を検出できませんでした', message: '引き手が顔に付き、両手が大きく開いた状態（フルドロー）が見つかりませんでした。' },
+    'no-release': { title: 'リリースを検出できませんでした', message: 'フルドローは見つかりましたが、その後のリリースの動きが見つかりませんでした。' },
+    'letdown': { title: '完全な1射が見つかりませんでした', message: 'フルドローの後、リリースせずに引き戻した（レットダウン）と判定されました。' }
+  };
+
+  /* ---------- 10. エントリポイント ---------- */
+  function analyze(frames, opts) {
+    opts = opts || {};
+    var prep = prepare(frames, opts);
+    var t = prep.t, n = t.length;
+    var base = { ok: false, version: VERSION, times: t.slice(), frameCount: n, error: null };
+    function fail(code) {
+      base.error = { code: code, title: 'フェーズを検出できませんでした', detail: (ERRORS[code] || ERRORS['no-full-draw']).title, message: (ERRORS[code] || ERRORS['no-full-draw']).message };
+      return base;
+    }
+    if (n < 10) return fail('too-few-frames');
+    var P = fillGaps(t, prep.P);
+    var core = 0;
+    P.forEach(function (p) { if (p && p[11] && p[12] && p[23] && p[24]) core++; });
+    base.detectedFrames = core;
+    if (core < Math.max(8, n * 0.4)) return fail('no-person');
+
+    var sides = detectSides(P, opts.handedness);
+    if (!sides) return fail('no-full-draw');
+    var R = rolesFor(sides.hand);
+    var o = orient(P, sides, R);
+    base.hand = sides.hand; base.handSource = sides.source; base.autoHand = sides.autoHand;
+    base.targetSide = sides.dir > 0 ? 'right' : 'left';
+    base.roles = { B: R.B, D: R.D };
+    base.flips = o.flips;
+
+    var B = buildBody(t, o.Q, R);
+    base.rollSource = B.rollSource;
+    var ph = detectPhases(t, B);
+    if (!ph.ok) return fail(ph.code);
+
+    var i0 = ph.setupStart >= 0 ? ph.setupStart : ph.drawStart >= 0 ? ph.drawStart : Math.max(0, idxNear(t, t[ph.anchor] - 2));
+    var shake = estimateShake(t, o.Q, R, B, i0, ph.followEnd);
+    var raw = computeMetrics(t, B, ph);
+    var metrics = DEFS.map(function (d) { return evaluate(d, raw[d.id]); });
+    var flagged = metrics.filter(function (m) { return m.status === 'flag'; })
+      .sort(function (a, b) { return b.score - a.score || DEFS.indexOf(a.def) - DEFS.indexOf(b.def); });
+    var findings = flagged.slice(0, 3).map(function (m) { return adviceCard(m, shake.high); });
+    var good = pickGood(metrics);
+
+    function P_(i) { return i >= 0 ? { i: i, t: t[i] } : null; }
+    var phases = {
+      setupStart: P_(ph.setupStart), setupPeak: P_(ph.setupPeak), drawStart: P_(ph.drawStart),
+      anchor: P_(ph.anchor), release: P_(ph.release), followEnd: P_(ph.followEnd),
+      releaseMethod: ph.releaseMethod, aimSec: t[ph.release] - t[ph.anchor], followAvailSec: ph.followAvail
+    };
+    var segs = [];
+    var tFirst = t[0], tLast = t[n - 1];
+    var sStart = phases.setupStart ? phases.setupStart.t : null;
+    var dStart = phases.drawStart ? phases.drawStart.t : null;
+    if (sStart !== null && sStart > tFirst) segs.push({ key: 'set', label: 'セット', t0: tFirst, t1: sStart });
+    if (sStart !== null) segs.push({ key: 'setup', label: 'セットアップ', t0: sStart, t1: dStart !== null && dStart > sStart ? dStart : phases.anchor.t });
+    if (dStart !== null) segs.push({ key: 'draw', label: 'ドロー', t0: Math.max(dStart, sStart || dStart), t1: phases.anchor.t });
+    segs.push({ key: 'aim', label: 'エイミング', t0: phases.anchor.t, t1: phases.release.t });
+    segs.push({ key: 'follow', label: 'フォロー', t0: phases.release.t, t1: Math.min(tLast, phases.release.t + 1.0) });
+
+    base.ok = true;
+    base.phases = phases;
+    base.segments = segs;
+    base.shake = shake;
+    base.metrics = metrics.map(function (m) {
+      return {
+        id: m.id, name: m.name, phase: m.phase, status: m.status, value: m.value, variant: m.variant,
+        score: m.score, closeness: m.closeness, at: m.at, range: m.range, frame: m.frame, pathRange: m.pathRange,
+        valueText: m.valueText, unitText: m.unitText || '', thresholdText: m.thresholdText, detailText: m.detailText,
+        naReason: m.naReason, naText: m.naText || null, gauge: m.gauge, extra: m.extra,
+        joints: m.def.joints.slice(), guide: m.def.guide
+      };
+    });
+    base.findings = findings;
+    base.flaggedCount = flagged.length;
+    base.good = good;
+    base.summary = summarize(metrics, flagged, good);
+    base.skippedShots = ph.skipped || [];
+    return base;
+  }
+
+  /* 表示用：解析フレーム i における役割（'B.s' など）の元ランドマーク番号 */
+  function rawIndex(analysis, i, role) {
+    if (!analysis || !analysis.roles) return -1;
+    var parts = role.split('.');
+    var side = analysis.roles[parts[0]];
+    if (!side || !(parts[1] in side)) return -1;
+    var idx = side[parts[1]];
+    return analysis.flips && analysis.flips[i] ? SWAP[idx] : idx;
+  }
+
+  return {
+    VERSION: VERSION, CFG: CFG, DEFS: DEFS, SWAP: SWAP,
+    analyze: analyze, rawIndex: rawIndex,
+    // テスト用に内部関数も公開（いずれも純関数）
+    _internal: { prepare: prepare, fillGaps: fillGaps, detectSides: detectSides, orient: orient, buildBody: buildBody, detectPhases: detectPhases, estimateShake: estimateShake, computeMetrics: computeMetrics, evaluate: evaluate, rolesFor: rolesFor, headRefImg: headRefImg }
+  };
+})();
+//LOGIC-END
+
+/* =====================================================================
+ * UI（ここから下は DOM・MediaPipe に依存）
+ * ===================================================================== */
+(function () {
+  'use strict';
+
+  var MP_VERSION = '1.2.3';
+  var MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@' + MP_VERSION;
+  var MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
+  var SAMPLE_FPS = 15;
+  var MAX_LONG_SIDE = 720;
+  var SEC_PER_FRAME_EST = [0.08, 0.2];
+  var CONNECTIONS = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28], [27, 29], [29, 31], [27, 31], [28, 30], [30, 32], [28, 32], [15, 17], [15, 19], [17, 19], [15, 21], [16, 18], [16, 20], [18, 20], [16, 22]];
+
+  var state = {
+    screen: 'guide', file: null, url: null, duration: 0, vw: 0, vh: 0,
+    range: { s: 0, e: 0 }, hand: 'auto',
+    landmarker: null, lastTs: 0, running: false, cancel: false,
+    frames: null, analysis: null, procW: 0, procH: 0,
+    activeFinding: -1, showSkeleton: true, rate: 0.5, scrubbing: false
+  };
+
+  function $(sel) { return document.querySelector(sel); }
+  function byId(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function icon(name, cls) { return '<svg class="icon ' + (cls || '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
+  function sec(x) { return (Math.round(x * 10) / 10).toFixed(1) + '秒'; }
+  function nextFrame() { return new Promise(function (r) { (window.requestAnimationFrame || setTimeout)(function () { r(); }); }); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var el = byId('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- 画面遷移 ---------- */
+  var STEP_ORDER = ['guide', 'setup', 'progress', 'result'];
+  function show(name) {
+    ['guide', 'setup', 'progress', 'result', 'error'].forEach(function (k) {
+      var el = byId('screen-' + k);
+      if (el) el.classList.toggle('active', k === name);
+    });
+    state.screen = name;
+    var cur = STEP_ORDER.indexOf(name === 'error' ? 'progress' : name);
+    var steps = document.querySelectorAll('.step');
+    for (var i = 0; i < steps.length; i++) {
+      var k = STEP_ORDER.indexOf(steps[i].getAttribute('data-step'));
+      steps[i].classList.toggle('done', k < cur);
+      steps[i].classList.toggle('now', k === cur);
+    }
+    if (name !== 'setup') pausePreview();
+    if (name !== 'result') { var rv = byId('rv'); if (rv && !rv.paused) rv.pause(); }
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 動画の読み込み ---------- */
+  function pickVideo() {
+    if (state.running) return;
+    var inp = byId('file-input');
+    inp.value = '';
+    inp.click();
+  }
+
+  function onFile(file) {
+    if (!file) return;
+    if (file.type && !/^video\//.test(file.type) && !/\.(mp4|mov|m4v|webm|3gp)$/i.test(file.name || '')) {
+      toast('動画ファイルを選んでください');
+      return;
+    }
+    if (state.url) { try { URL.revokeObjectURL(state.url); } catch (e) { /* noop */ } }
+    state.file = file;
+    state.url = URL.createObjectURL(file);
+    state.analysis = null; state.frames = null;
+    var v = byId('pv');
+    v.onloadedmetadata = function () {
+      var d = v.duration;
+      if (!isFinite(d) || d <= 0) { showFatal('decode'); return; }
+      state.duration = d; state.vw = v.videoWidth || 16; state.vh = v.videoHeight || 9;
+      state.range = { s: 0, e: Math.round(d * 10) / 10 };
+      setupRangeUI();
+      show('setup');
+    };
+    v.onerror = function () { showFatal('decode'); };
+    v.src = state.url;
+    v.load();
+  }
+
+  /* ---------- 区間選択 ---------- */
+  function setupRangeUI() {
+    var d = state.duration;
+    byId('pv-stage').style.setProperty('--ar', (state.vw / state.vh).toFixed(4));
+    ['rs', 're'].forEach(function (id) {
+      var el = byId(id);
+      el.max = String(Math.round(d * 10) / 10);
+      el.step = '0.1';
+    });
+    byId('rs').value = String(state.range.s);
+    byId('re').value = String(state.range.e);
+    updateRangeUI();
+    updatePreviewUI();
+  }
+
+  function updateRangeUI() {
+    var s = state.range.s, e = state.range.e, d = state.duration || 1;
+    byId('rs-val').textContent = sec(s);
+    byId('re-val').textContent = sec(e);
+    var len = Math.max(0, e - s);
+    byId('range-sum').textContent = '解析区間 ' + s.toFixed(1) + '〜' + e.toFixed(1) + '秒（' + len.toFixed(1) + '秒）';
+    var sel = byId('pv-sel');
+    sel.style.left = (s / d * 100) + '%';
+    sel.style.width = (len / d * 100) + '%';
+    var nf = Math.floor(len * SAMPLE_FPS) + 1;
+    byId('est-frames').textContent = nf + '枚（' + SAMPLE_FPS + 'fps・長辺' + MAX_LONG_SIDE + 'px）';
+    var lo = Math.max(5, Math.round(nf * SEC_PER_FRAME_EST[0])), hi = Math.max(10, Math.round(nf * SEC_PER_FRAME_EST[1]));
+    byId('est-time').textContent = '約' + lo + '〜' + hi + '秒' + (state.landmarker ? '' : '＋初回の読み込み');
+    var btn = byId('btn-analyze');
+    btn.disabled = len < 1.5;
+    if (len > 40) byId('est-time').textContent += '（長い区間は時間がかかります）';
+  }
+
+  function onRangeInput(which) {
+    var s = parseFloat(byId('rs').value), e = parseFloat(byId('re').value);
+    if (which === 's' && s > e - 0.5) { s = Math.max(0, e - 0.5); byId('rs').value = String(s); }
+    if (which === 'e' && e < s + 0.5) { e = Math.min(state.duration, s + 0.5); byId('re').value = String(e); }
+    state.range = { s: s, e: e };
+    updateRangeUI();
+    var v = byId('pv');
+    if (v && v.readyState >= 1) v.currentTime = which === 's' ? s : e;
+  }
+
+  function setRangeFromCurrent(which) {
+    var v = byId('pv'), t = Math.round((v.currentTime || 0) * 10) / 10;
+    if (which === 's') { state.range.s = Math.min(t, Math.max(0, state.range.e - 0.5)); byId('rs').value = String(state.range.s); }
+    else { state.range.e = Math.max(t, Math.min(state.duration, state.range.s + 0.5)); byId('re').value = String(state.range.e); }
+    updateRangeUI();
+    toast(which === 's' ? '開始位置を ' + sec(state.range.s) + ' にしました' : '終了位置を ' + sec(state.range.e) + ' にしました');
+  }
+
+  function pausePreview() { var v = byId('pv'); if (v && !v.paused) v.pause(); }
+
+  function updatePreviewUI() {
+    var v = byId('pv'), d = state.duration || 1, t = v.currentTime || 0;
+    byId('pv-time').textContent = t.toFixed(1) + ' / ' + d.toFixed(1) + '秒';
+    byId('pv-fill').style.width = (t / d * 100) + '%';
+    byId('pv-head').style.left = (t / d * 100) + '%';
+    setPlayIcon('pv-play-ic', !v.paused);
+    byId('pv-badge').textContent = t >= state.range.s && t <= state.range.e ? '解析区間内' : '区間外';
+  }
+
+  function setPlayIcon(id, playing) {
+    var el = byId(id);
+    if (!el) return;
+    el.innerHTML = '<use href="#i-' + (playing ? 'pause' : 'play') + '"/>';
+  }
+
+  function bindScrub(el, getDur, onSeek) {
+    function pos(ev) {
+      var rect = el.getBoundingClientRect();
+      var x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+      return Math.max(0, Math.min(1, x / Math.max(1, rect.width)));
+    }
+    el.addEventListener('pointerdown', function (ev) {
+      state.scrubbing = true;
+      if (el.setPointerCapture && ev.pointerId !== undefined) { try { el.setPointerCapture(ev.pointerId); } catch (e) { /* noop */ } }
+      onSeek(pos(ev) * getDur());
+    });
+    el.addEventListener('pointermove', function (ev) { if (state.scrubbing) onSeek(pos(ev) * getDur()); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { el.addEventListener(t, function () { state.scrubbing = false; }); });
+  }
+
+  /* ---------- MediaPipe ---------- */
+  function ensureLandmarker() {
+    if (state.landmarker) return Promise.resolve(state.landmarker);
+    var mod;
+    return import(MP_BASE + '/vision_bundle.mjs').then(function (m) {
+      mod = m;
+      return mod.FilesetResolver.forVisionTasks(MP_BASE + '/wasm');
+    }).then(function (fileset) {
+      function opts(delegate) {
+        return {
+          baseOptions: { modelAssetPath: MODEL_URL, delegate: delegate },
+          runningMode: 'VIDEO', numPoses: 2,
+          minPoseDetectionConfidence: 0.5, minPosePresenceConfidence: 0.5, minTrackingConfidence: 0.5
+        };
+      }
+      return mod.PoseLandmarker.createFromOptions(fileset, opts('GPU')).then(function (lm) {
+        state.delegate = 'GPU';
+        return lm;
+      }, function () {
+        state.delegate = 'CPU';
+        return mod.PoseLandmarker.createFromOptions(fileset, opts('CPU'));
+      });
+    }).then(function (lm) {
+      state.landmarker = lm;
+      return lm;
+    });
+  }
+
+  function poseBox(lm) {
+    var x0 = 1, x1 = 0, y0 = 1, y1 = 0;
+    for (var i = 0; i < lm.length; i++) {
+      var p = lm[i];
+      if (!p || (p.visibility !== undefined && p.visibility < 0.3)) continue;
+      x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+    }
+    return { area: Math.max(0, x1 - x0) * Math.max(0, y1 - y0), cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+  }
+
+  function pickPose(list, prev) {
+    if (!list || !list.length) return null;
+    var best = list[0];
+    if (list.length > 1) {
+      if (prev) {
+        var pb = poseBox(prev), bd = Infinity;
+        list.forEach(function (lm) { var b = poseBox(lm), d = Math.hypot(b.cx - pb.cx, b.cy - pb.cy); if (d < bd) { bd = d; best = lm; } });
+      } else {
+        var ba = -1;
+        list.forEach(function (lm) { var a = poseBox(lm).area; if (a > ba) { ba = a; best = lm; } });
+      }
+    }
+    return best.map(function (p) { return { x: p.x, y: p.y, z: p.z, visibility: p.visibility === undefined ? 1 : p.visibility }; });
+  }
+
+  function seekTo(v, t) {
+    return new Promise(function (resolve) {
+      if (Math.abs((v.currentTime || 0) - t) < 0.001 && v.readyState >= 2) { resolve(); return; }
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        v.removeEventListener('seeked', finish);
+        clearTimeout(timer);
+        resolve();
+      }
+      var timer = setTimeout(finish, 4000);
+      v.addEventListener('seeked', finish);
+      v.currentTime = t;
+    });
+  }
+
+  function waitEvent(el, ev, ms) {
+    return new Promise(function (resolve) {
+      var timer = setTimeout(done, ms);
+      function done() { clearTimeout(timer); el.removeEventListener(ev, done); resolve(); }
+      el.addEventListener(ev, done);
+    });
+  }
+
+  function disposeVideo(v) {
+    if (!v) return;
+    try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) { /* noop */ }
+    if (v.parentNode) v.parentNode.removeChild(v);
+  }
+
+  function makeExtractVideo() {
+    var v = document.createElement('video');
+    v.className = 'offscreen-video';
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+    v.src = state.url;
+    document.body.appendChild(v);
+    return v;
+  }
+
+  function buildTimes(s, e, fps) {
+    var out = [], step = 1 / fps;
+    for (var k = 0; ; k++) {
+      var t = s + k * step;
+      if (t > e + 1e-6) break;
+      out.push(Math.round(t * 1000) / 1000);
+    }
+    return out;
+  }
+
+  /* ---------- 解析の実行 ---------- */
+  function setStep(key, status, meta) {
+    var li = document.querySelector('.steps li[data-st="' + key + '"]');
+    if (li) { li.classList.toggle('active', status === 'active'); li.classList.toggle('done', status === 'done'); }
+    if (meta !== undefined) { var m = byId('st-' + key + '-meta'); if (m) m.textContent = meta; }
+  }
+
+  function setProgress(p, sub, eta) {
+    p = Math.max(0, Math.min(1, p));
+    var fg = byId('ring-fg');
+    if (fg) fg.setAttribute('stroke-dashoffset', String(326.73 * (1 - p)));
+    byId('ring-pct').innerHTML = Math.round(p * 100) + '<small>%</small>';
+    if (sub !== undefined) byId('ring-sub').textContent = sub;
+    if (eta !== undefined) byId('prog-eta').textContent = eta;
+  }
+
+  function resetProgressUI() {
+    ['engine', 'frames', 'phases', 'advice'].forEach(function (k) { setStep(k, 'idle', ''); });
+    setProgress(0, '準備中', '解析エンジンを準備しています');
+    var c = byId('pp');
+    if (c && c.getContext) { var g = c.getContext('2d'); if (g) { g.fillStyle = '#0F1115'; g.fillRect(0, 0, c.width, c.height); } }
+  }
+
+  function startAnalysis() {
+    if (state.running || !state.url) return;
+    state.running = true; state.cancel = false;
+    show('progress');
+    resetProgressUI();
+    var xv = null;
+    setStep('engine', 'active', state.landmarker ? '読み込み済み' : '初回は数十秒');
+    return ensureLandmarker().then(function (lm) {
+      setStep('engine', 'done', state.delegate === 'CPU' ? 'CPU で実行' : 'GPU で実行');
+      setProgress(0.06, '骨格推定', 'フレームを解析しています');
+      xv = makeExtractVideo();
+      return extractFrames(lm, xv);
+    }, function (err) {
+      var e = new Error('engine'); e.kind = 'engine'; e.cause = err; throw e;
+    }).then(function (frames) {
+      disposeVideo(xv);
+      xv = null;
+      state.frames = frames;
+      setStep('frames', 'done');
+      setStep('phases', 'active');
+      setProgress(0.96, 'フェーズ検出', '射のフェーズを検出しています');
+      return nextFrame().then(function () {
+        var a = ArcheryLogic.analyze(frames, { width: state.procW, height: state.procH, handedness: state.hand });
+        state.analysis = a;
+        if (!a.ok) { setStep('phases', 'idle', '失敗'); showAnalysisError(a); return; }
+        setStep('phases', 'done', 'エイミング ' + a.phases.aimSec.toFixed(1) + '秒');
+        setStep('advice', 'active');
+        setProgress(1, '完了', '結果を表示します');
+        return sleep(250).then(function () {
+          setStep('advice', 'done');
+          renderResult(a);
+          show('result');
+        });
+      });
+    }).catch(function (err) {
+      disposeVideo(xv);
+      if (err && err.cancelled) { toast('解析を中止しました'); show('setup'); return; }
+      showFatal(err && err.kind === 'engine' ? 'engine' : 'runtime', err && (err.cause || err));
+    }).then(function () { state.running = false; });
+  }
+
+  function extractFrames(lm, v) {
+    var frames = [], prev = null, times = buildTimes(state.range.s, state.range.e, SAMPLE_FPS);
+    var cv = document.createElement('canvas'), ctx = null, cw = 0, ch = 0, t0 = 0, i = 0;
+    // MediaPipe の VIDEO モードはタイムスタンプが単調増加である必要がある（再解析・中止後も含めて）
+    var tsStart = state.lastTs + 1000;
+    function prepare() {
+      var p = v.readyState >= 1 ? Promise.resolve() : waitEvent(v, 'loadedmetadata', 8000);
+      return p.then(function () {
+        if (!v.videoWidth) throw new Error('video not ready');
+        var playP = v.play && v.play();
+        return Promise.race([playP && playP.catch ? playP.catch(function () {}) : Promise.resolve(), sleep(1200)]);
+      }).then(function () {
+        v.pause();
+        var scale = Math.min(1, MAX_LONG_SIDE / Math.max(v.videoWidth, v.videoHeight));
+        cw = Math.max(2, Math.round(v.videoWidth * scale)); ch = Math.max(2, Math.round(v.videoHeight * scale));
+        cv.width = cw; cv.height = ch;
+        state.procW = cw; state.procH = ch;
+        ctx = cv.getContext('2d');
+        t0 = performance.now();
+      });
+    }
+    function step() {
+      if (state.cancel) { var c = new Error('cancelled'); c.cancelled = true; throw c; }
+      if (i >= times.length) return frames;
+      var t = times[i];
+      return seekTo(v, t).then(function () {
+        ctx.drawImage(v, 0, 0, cw, ch);
+        var ts = tsStart + Math.round((t - state.range.s) * 1000) + 1;
+        var res = lm.detectForVideo(cv, ts);
+        state.lastTs = ts;
+        var pose = pickPose(res && res.landmarks, prev);
+        if (pose) prev = pose;
+        frames.push({ t: t, lm: pose });
+        i++;
+        var el = (performance.now() - t0) / 1000, per = el / i, left = Math.max(0, (times.length - i) * per);
+        setProgress(0.06 + 0.9 * i / times.length, i + ' / ' + times.length, 'のこり約' + Math.ceil(left) + '秒');
+        setStep('frames', 'active', i + '/' + times.length);
+        if (i % 3 === 1) drawPreview(cv, pose, cw, ch);
+        return (i % 2 === 0 ? nextFrame() : Promise.resolve()).then(step);
+      });
+    }
+    return prepare().then(step);
+  }
+
+  function drawPreview(src, pose, w, h) {
+    var c = byId('pp');
+    if (!c || !c.getContext) return;
+    var W = 480, H = Math.round(W * h / w);
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    var g = c.getContext('2d');
+    if (!g) return;
+    g.drawImage(src, 0, 0, W, H);
+    if (pose) drawSkeleton(g, pose, W, H, 1.2);
+    byId('pp-badge').textContent = pose ? '骨格を検出' : '人物を探しています';
+  }
+
+  /* ---------- 骨格の描画 ---------- */
+  function drawSkeleton(g, lm, W, H, k) {
+    k = k || 1;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    function vis(p) { return p && (p.visibility === undefined || p.visibility >= 0.3); }
+    function line(a, b) { g.beginPath(); g.moveTo(a.x * W, a.y * H); g.lineTo(b.x * W, b.y * H); g.stroke(); }
+    g.strokeStyle = 'rgba(15,17,21,.55)'; g.lineWidth = 5 * k;
+    CONNECTIONS.forEach(function (c) { var a = lm[c[0]], b = lm[c[1]]; if (vis(a) && vis(b)) line(a, b); });
+    g.strokeStyle = 'rgba(255,255,255,.92)'; g.lineWidth = 2.4 * k;
+    CONNECTIONS.forEach(function (c) { var a = lm[c[0]], b = lm[c[1]]; if (vis(a) && vis(b)) line(a, b); });
+    [0, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28].forEach(function (i) {
+      var p = lm[i];
+      if (!vis(p)) return;
+      g.beginPath(); g.arc(p.x * W, p.y * H, 3.6 * k, 0, Math.PI * 2);
+      g.fillStyle = '#2754C5'; g.fill();
+      g.lineWidth = 1.5 * k; g.strokeStyle = '#fff'; g.stroke();
+    });
+  }
+
+  /* ---------- 結果画面 ---------- */
+  function frameAt(t) {
+    var a = state.analysis, f = state.frames;
+    if (!a || !f || !f.length) return -1;
+    var lo = 0, hi = f.length - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (f[m].t < t) lo = m; else hi = m; }
+    var i = Math.abs(f[lo].t - t) <= Math.abs(f[hi].t - t) ? lo : hi;
+    return Math.abs(f[i].t - t) <= 0.2 ? i : -1;
+  }
+
+  function headRefRaw(lm) {
+    var n = lm[0], a = lm[9], b = lm[10];
+    if (n && a && b) return { x: (n.x + (a.x + b.x) / 2) / 2, y: (n.y + (a.y + b.y) / 2) / 2 };
+    return n || null;
+  }
+
+  function rolePoint(i, role) {
+    var lm = state.frames[i] && state.frames[i].lm;
+    if (!lm) return null;
+    if (role === 'H') return headRefRaw(lm);
+    var k = ArcheryLogic.rawIndex(state.analysis, i, role);
+    return k >= 0 ? lm[k] : null;
+  }
+
+  function activeItem() {
+    var a = state.analysis;
+    if (!a) return null;
+    if (state.activeFinding >= 0 && a.findings[state.activeFinding]) return a.findings[state.activeFinding];
+    if (state.activeFinding === -2 && a.good) return a.good;
+    return null;
+  }
+
+  function drawOverlay() {
+    var cv = byId('ov'), v = byId('rv');
+    if (!cv || !v || !cv.getContext) return;
+    var rect = cv.getBoundingClientRect();
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = Math.max(1, Math.round(rect.width * dpr)), H = Math.max(1, Math.round(rect.height * dpr));
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    var g = cv.getContext('2d');
+    if (!g) return;
+    g.clearRect(0, 0, W, H);
+    var t = v.currentTime || 0;
+    updateTimeUI(t);
+    if (!state.showSkeleton) return;
+    var i = frameAt(t);
+    if (i < 0 || !state.frames[i].lm) return;
+    var k = dpr * Math.max(0.8, Math.min(1.6, rect.width / 420));
+    var item = activeItem();
+    if (item) drawGuide(g, item, i, W, H, k);
+    drawSkeleton(g, state.frames[i].lm, W, H, k);
+    if (item) {
+      item.joints.forEach(function (role) {
+        var p = rolePoint(i, role);
+        if (!p) return;
+        g.beginPath(); g.arc(p.x * W, p.y * H, 9 * k, 0, Math.PI * 2);
+        g.lineWidth = 3 * k; g.strokeStyle = '#fff'; g.stroke();
+        g.beginPath(); g.arc(p.x * W, p.y * H, 9 * k, 0, Math.PI * 2);
+        g.lineWidth = 2 * k; g.strokeStyle = '#2754C5'; g.stroke();
+      });
+    }
+  }
+
+  function drawGuide(g, item, i, W, H, k) {
+    function P(role) { var p = rolePoint(i, role); return p ? { x: p.x * W, y: p.y * H } : null; }
+    function dashed(a, b, ext) {
+      if (!a || !b) return;
+      var dx = b.x - a.x, dy = b.y - a.y;
+      ext = ext || [0, 0];
+      g.beginPath();
+      g.moveTo(a.x - dx * ext[0], a.y - dy * ext[0]);
+      g.lineTo(b.x + dx * ext[1], b.y + dy * ext[1]);
+      g.stroke();
+    }
+    g.save();
+    g.setLineDash([6 * k, 6 * k]);
+    g.lineWidth = 2.2 * k;
+    g.strokeStyle = 'rgba(255,255,255,.95)';
+    switch (item.guide) {
+      case 'shoulders': dashed(P('D.s'), P('B.s'), [0.6, 0.6]); g.strokeStyle = 'rgba(255,255,255,.5)'; dashed(P('D.h'), P('B.h'), [0.9, 0.9]); break;
+      case 'bowline': dashed(P('B.s'), P('B.w'), [1.6, 0.15]); break;
+      case 'trunk': {
+        var hb = P('B.h'), hd = P('D.h'), sb = P('B.s'), sd = P('D.s');
+        if (hb && hd && sb && sd) {
+          var hm = { x: (hb.x + hd.x) / 2, y: (hb.y + hd.y) / 2 }, sm = { x: (sb.x + sd.x) / 2, y: (sb.y + sd.y) / 2 };
+          dashed(hm, sm, [0, 0.3]);
+          var hx = hb.x - hd.x, hy = hb.y - hd.y, L = Math.hypot(hx, hy) || 1, len = Math.hypot(sm.x - hm.x, sm.y - hm.y);
+          var nx = hy / L, ny = -hx / L;
+          if (ny > 0) { nx = -nx; ny = -ny; }
+          g.strokeStyle = 'rgba(255,255,255,.5)';
+          dashed(hm, { x: hm.x + nx * len, y: hm.y + ny * len }, [0, 0.3]);
+        }
+        break;
+      }
+      case 'ears': dashed(P('D.ear'), P('B.ear'), [1.5, 1.5]); g.strokeStyle = 'rgba(255,255,255,.5)'; dashed(P('D.s'), P('B.s'), [0.3, 0.3]); break;
+      case 'anchor': dashed(P('H'), P('D.w')); break;
+      case 'wrists': dashed(P('D.w'), P('B.w')); break;
+      default: break;
+    }
+    g.restore();
+    var pr = item.pathRange;
+    if (item.guide === 'path' && pr) {
+      var role = item.joints[0], pts = [];
+      for (var j = pr[0]; j <= pr[1]; j++) { var p = rolePoint(j, role); if (p) pts.push({ x: p.x * W, y: p.y * H }); }
+      if (pts.length > 1) {
+        g.save();
+        g.lineWidth = 3 * k; g.strokeStyle = 'rgba(39,84,197,.95)'; g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); g.moveTo(pts[0].x, pts[0].y);
+        pts.forEach(function (q) { g.lineTo(q.x, q.y); });
+        g.stroke();
+        pts.forEach(function (q) { g.beginPath(); g.arc(q.x, q.y, 2.6 * k, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); });
+        g.restore();
+      }
+    }
+  }
+
+  function tlDomain() {
+    var f = state.frames;
+    return f && f.length ? [f[0].t, f[f.length - 1].t] : [0, state.duration || 1];
+  }
+  function pct(t) { var d = tlDomain(); return Math.max(0, Math.min(100, (t - d[0]) / Math.max(0.001, d[1] - d[0]) * 100)); }
+
+  function phaseLabelAt(t) {
+    var a = state.analysis;
+    if (!a || !a.segments) return '-';
+    if (a.phases && a.phases.release && Math.abs(t - a.phases.release.t) < 0.07) return 'リリース';
+    for (var i = a.segments.length - 1; i >= 0; i--) {
+      var s = a.segments[i];
+      if (t >= s.t0 - 1e-6 && t <= s.t1 + 1e-6) return s.label;
+    }
+    return t < a.segments[0].t0 ? 'セット' : '-';
+  }
+
+  function updateTimeUI(t) {
+    var el = byId('rv-time');
+    if (el) el.textContent = t.toFixed(1) + '秒';
+    var head = byId('tl-head');
+    if (head) head.style.left = pct(t) + '%';
+    var ph = byId('rv-phase');
+    if (ph) ph.textContent = phaseLabelAt(t);
+    var v = byId('rv');
+    if (v) setPlayIcon('rv-play-ic', !v.paused);
+  }
+
+  function gaugeHTML(gz) {
+    if (!gz) return '';
+    var span = gz.hi - gz.lo || 1;
+    function p(x) { return Math.max(0, Math.min(100, (x - gz.lo) / span * 100)); }
+    var okL = p(gz.okLo), okR = p(gz.okHi);
+    return '<div class="gauge" aria-hidden="true"><div class="ok" style="left:' + okL + '%;width:' + Math.max(0, okR - okL) + '%"></div><div class="val" style="left:' + p(gz.value) + '%"></div></div>' +
+      '<div class="gauge-legend"><span>色の帯＝目安の範囲</span><span>縦線＝今回の値</span></div>';
+  }
+
+  function renderResult(a) {
+    state.activeFinding = -1;
+    byId('res-summary').textContent = a.summary;
+    var measured = a.metrics.filter(function (m) { return m.status !== 'na'; }).length;
+    byId('res-chips').innerHTML = [
+      '<span class="chip acc">' + icon('person') + (a.hand === 'left' ? '左利き' : '右利き') + (a.handSource === 'auto' ? '（自動判定）' : '') + '</span>',
+      '<span class="chip">' + icon('clock') + 'エイミング ' + a.phases.aimSec.toFixed(1) + '秒</span>',
+      '<span class="chip">' + icon('ruler') + '測定 ' + measured + '/' + a.metrics.length + '項目</span>',
+      '<span class="chip">' + icon('target') + '対象の射 ' + (a.phases.setupStart || a.phases.drawStart || a.phases.anchor).t.toFixed(1) + '〜' + a.phases.release.t.toFixed(1) + '秒</span>'
+    ].join('');
+
+    var banner = '';
+    if (a.shake && a.shake.high) {
+      banner = '<div class="banner warn" style="margin-top:12px">' + icon('shake') + '<div><b>カメラの揺れが大きめです</b>（推定 ' + a.shake.rms.toFixed(3) + '、目安 ' + a.shake.threshold.toFixed(2) + ' 以下）。各指標は体の軸を基準にした相対値ですが、揺れが大きい場合は参考値としてご覧ください。</div></div>';
+    }
+    if (a.skippedShots && a.skippedShots.length) {
+      banner += '<div class="banner info" style="margin-top:12px">' + icon('info') + '<div>' + a.skippedShots.map(function (s) { return s.t0.toFixed(1) + '秒付近のフルドロー'; }).join('、') + 'はリリースまで確認できなかったため、次の射を対象にしました。</div></div>';
+    }
+    byId('res-banner').innerHTML = banner;
+
+    // findings
+    var fh = '';
+    if (!a.findings.length) {
+      fh = '<div class="card empty"><div class="empty-ic">' + icon('check-circle', 'lg') + '</div><h3>目安を超えた項目はありませんでした</h3><p>測定できた項目はすべて目安の範囲内です。下の「すべての測定値」で各数値を確認できます。</p></div>';
+    } else {
+      fh = a.findings.map(function (f, idx) { return findingHTML(f, idx); }).join('');
+    }
+    byId('findings').innerHTML = fh;
+    byId('find-count').textContent = a.findings.length ? (a.flaggedCount > a.findings.length ? '差の大きい順に ' + a.findings.length + ' / ' + a.flaggedCount + ' 件' : '差の大きい順に ' + a.findings.length + ' 件') : '';
+
+    // good point
+    var g = a.good;
+    byId('goodpoint').innerHTML = g ? (
+      '<div class="card good"><div class="good-ic">' + icon('check-circle') + '</div><div>' +
+      '<div class="f-meta">' + esc(g.phase) + '・' + esc(g.name) + '</div>' +
+      '<h3>' + esc(g.text) + '</h3>' +
+      '<p class="ev-detail">算出値 ' + esc(g.value) + ' ' + esc(g.unit || '') + '／' + esc(g.threshold) + '</p>' +
+      (g.at !== null && g.at !== undefined ? '<button class="jump" data-action="jump" data-t="' + g.at + '" data-idx="-2">' + icon('crosshair', 'sm') + '動画の ' + sec(g.at) + 'あたりを見る' + icon('chev-right', 'sm go') + '</button>' : '') +
+      '</div></div>'
+    ) : '<div class="card empty"><h3>今回は目安の範囲に収まった項目がありませんでした</h3><p>まずはチェックポイントの1番から取り組んでみてください。</p></div>';
+
+    // all metrics
+    byId('mlist').innerHTML = a.metrics.map(function (m) {
+      var pill = m.status === 'flag' ? '<span class="pill flag">要チェック</span>' : m.status === 'ok' ? '<span class="pill ok">目安内</span>' : '<span class="pill na">測定できず</span>';
+      var body = m.status === 'na' ? esc(m.naText) : '算出値 ' + esc(m.valueText) + ' ' + esc(m.unitText) + '／' + esc(m.thresholdText);
+      return '<div class="mrow"><div class="m-name"><small>' + esc(m.id) + '</small>' + esc(m.name) + '</div>' + pill + '<div class="m-val">' + body + '</div></div>';
+    }).join('');
+    byId('all-metrics').open = false;
+
+    setupResultPlayer(a);
+  }
+
+  function findingHTML(f, idx) {
+    var ev = f.evidence;
+    var jump = ev.at !== null && ev.at !== undefined
+      ? '<button class="jump" data-action="jump" data-t="' + ev.at + '" data-idx="' + idx + '">' + icon('crosshair', 'sm') + '動画の ' + sec(ev.at) + 'あたりを見る' + icon('chev-right', 'sm go') + '</button>'
+      : '';
+    return '<article class="card finding" id="finding-' + idx + '">' +
+      '<div class="f-head"><div class="f-num">' + (idx + 1) + '</div><div>' +
+      '<div class="f-meta">' + esc(f.phase) + '・' + esc(f.id) + ' ' + esc(f.name) + '</div>' +
+      '<h3 class="f-title">' + esc(f.title) + '</h3></div></div>' +
+      '<div class="f-body">' +
+      '<div class="evidence"><div class="ev-label">根拠（測定値）</div>' +
+      '<div class="ev-main"><span class="ev-val num">' + esc(ev.value) + '</span><span class="ev-unit">' + esc(ev.unit) + '</span></div>' +
+      '<div class="ev-thr">' + esc(ev.threshold) + '</div>' +
+      gaugeHTML(ev.gauge) +
+      '<div class="ev-detail">' + esc(ev.detail) + '</div>' + jump + '</div>' +
+      (f.note ? '<div class="note-shake">' + icon('shake') + esc(f.note) + '</div>' : '') +
+      '<div class="cue">' + icon('bulb') + '<div><div class="ev-label" style="color:var(--accent-ink)">意識するキュー</div><p>「' + esc(f.cue) + '」</p></div></div>' +
+      '<div class="drills"><div class="ev-label">ドリル</div><ul>' + f.drills.map(function (d) { return '<li>' + icon('repeat') + '<span>' + esc(d) + '</span></li>'; }).join('') + '</ul></div>' +
+      '<details class="why"><summary>' + icon('book', 'sm') + 'このチェックポイントについて' + icon('chev-down', 'sm chev') + '</summary>' +
+      '<div class="why-body"><p><b>チェックポイント：</b>' + esc(f.checkpoint) + '</p><p style="margin-top:6px">' + esc(f.why) + '</p><p class="src">出典：' + esc(f.source) + '</p></div></details>' +
+      '</div></article>';
+  }
+
+  function setupResultPlayer(a) {
+    var v = byId('rv');
+    byId('rv-stage').style.setProperty('--ar', ((state.procW || state.vw) / (state.procH || state.vh)).toFixed(4));
+    if (v.getAttribute('src') !== state.url) { v.src = state.url; v.load(); }
+    v.playbackRate = state.rate;
+    var d = tlDomain(), span = Math.max(0.001, d[1] - d[0]);
+    function L(t) { return ((t - d[0]) / span * 100).toFixed(2); }
+    byId('tl-segs').innerHTML = a.segments.map(function (s) {
+      return '<div class="tl-seg ' + s.key + '" style="left:' + L(s.t0) + '%;width:' + Math.max(0, (s.t1 - s.t0) / span * 100).toFixed(2) + '%"></div>';
+    }).join('') + '<div class="tl-rel" style="left:' + L(a.phases.release.t) + '%"></div>';
+    byId('tl-marks').innerHTML = a.findings.map(function (f, idx) {
+      return f.evidence.at === null ? '' : '<button class="tl-mark" data-action="jump" data-t="' + f.evidence.at + '" data-idx="' + idx + '" style="left:' + L(f.evidence.at) + '%" aria-label="チェックポイント' + (idx + 1) + 'の瞬間へ">' + (idx + 1) + '</button>';
+    }).join('');
+    var labels = [];
+    a.segments.forEach(function (s) { if (s.key !== 'set' && (s.t1 - s.t0) / span > 0.08) labels.push('<span style="left:' + L((s.t0 + s.t1) / 2) + '%">' + esc(s.label) + '</span>'); });
+    byId('tl-labels').innerHTML = labels.join('');
+    var startT = (a.phases.setupStart || a.phases.drawStart || a.phases.anchor).t;
+    var setT = function () { v.currentTime = Math.max(d[0], startT - 0.3); };
+    if (v.readyState >= 1) setT(); else v.addEventListener('loadedmetadata', setT, { once: true });
+    updateActiveCards();
+    drawOverlay();
+  }
+
+  function updateActiveCards() {
+    var cards = document.querySelectorAll('.finding');
+    for (var i = 0; i < cards.length; i++) cards[i].classList.toggle('active', cards[i].id === 'finding-' + state.activeFinding);
+  }
+
+  function jumpTo(t, idx) {
+    var v = byId('rv');
+    if (!v) return;
+    state.activeFinding = idx;
+    updateActiveCards();
+    v.pause();
+    v.currentTime = Math.max(0, t);
+    var card = byId('player-card');
+    if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    drawOverlay();
+  }
+
+  var loopOn = false;
+  function startLoop() {
+    var v = byId('rv');
+    if (loopOn || !v) return;
+    loopOn = true;
+    var tick = function () {
+      var d = tlDomain();
+      if (!v.paused && v.currentTime >= d[1]) v.pause();
+      drawOverlay();
+      if (v.paused) { loopOn = false; return; }
+      if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(tick);
+    };
+    if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(tick);
+  }
+
+  function toggleResultPlay() {
+    var v = byId('rv'), d = tlDomain();
+    if (!v) return;
+    if (v.paused) {
+      if (v.currentTime >= d[1] - 0.05 || v.currentTime < d[0] - 0.05) v.currentTime = d[0];
+      v.playbackRate = state.rate;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { toast('再生できませんでした'); });
+    } else v.pause();
+  }
+
+  /* ---------- エラー表示 ---------- */
+  var TIPS = {
+    'too-few-frames': ['解析区間を、セットアップ前からリリース後 1 秒までの 1 射分に広げる'],
+    'no-person': ['頭から足先まで、全身が画面に入るように撮る', '逆光を避け、明るい場所で撮る', '射手の前後に人が重ならない位置から撮る'],
+    'no-full-draw': ['射手の胸の正面（横）から撮る。後ろや斜めからだと手の位置が重なります', '弓手の先と引き肘まで画面に入れる（スマホは横向きがおすすめ）', '解析区間にフルドローが含まれているか確認する', '利き手を手動で選んでみる'],
+    'no-release': ['リリース後も 1 秒以上撮り続ける', '解析区間の終わりを、リリースより後ろにする'],
+    'letdown': ['リリースまで撮影された射を含む区間を選ぶ']
+  };
+
+  function renderErrorScreen(title, sub, tips, detail, canBack) {
+    byId('err-h').textContent = title;
+    byId('err-sub').textContent = sub;
+    byId('err-tips').innerHTML = (tips || []).map(function (t) { return '<li>' + icon('check') + '<span>' + esc(t) + '</span></li>'; }).join('');
+    byId('err-detail').textContent = detail || '';
+    byId('err-back').classList.toggle('hidden', !canBack);
+    show('error');
+  }
+
+  function showAnalysisError(a) {
+    var e = a.error || {};
+    renderErrorScreen(e.title || 'フェーズを検出できませんでした', (e.detail ? e.detail + '。' : '') + (e.message || ''), TIPS[e.code] || TIPS['no-full-draw'], '検出できたフレーム ' + (a.detectedFrames || 0) + ' / ' + (a.frameCount || 0), true);
+  }
+
+  function showFatal(kind, err) {
+    var msg = err && (err.message || String(err));
+    if (kind === 'engine') {
+      renderErrorScreen('解析エンジンを読み込めませんでした', '初回は解析エンジンとモデルのダウンロードにインターネット接続が必要です。通信状況を確認して、もう一度お試しください。', ['Wi-Fi などの安定した回線につなぐ', 'ブラウザを最新版にする（Safari / Chrome）', 'プライベートブラウズを使っている場合は通常モードで開く'], msg, true);
+    } else if (kind === 'decode') {
+      renderErrorScreen('この動画を読み込めませんでした', 'ブラウザがこの動画形式を再生できないようです。', ['スマホの標準カメラで撮った MP4 / MOV 動画を選ぶ', '動画を短く切り出してから選ぶ'], msg, false);
+    } else {
+      renderErrorScreen('解析中に問題が発生しました', '動画の読み込みや骨格推定の途中で止まりました。区間を短くして、もう一度お試しください。', ['解析区間を 1 射分（10 秒前後）に絞る', 'ほかのアプリを閉じてから再実行する'], msg, true);
+    }
+  }
+
+  /* ---------- イベント ---------- */
+  function onClick(ev) {
+    var el = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
+    if (!el) return;
+    var act = el.getAttribute('data-action');
+    switch (act) {
+      case 'pick-video': pickVideo(); break;
+      case 'go-guide': if (!state.running) show('guide'); break;
+      case 'analyze': startAnalysis(); break;
+      case 'cancel': state.cancel = true; break;
+      case 'back-setup': if (state.url) show('setup'); else show('guide'); break;
+      case 'set-start': setRangeFromCurrent('s'); break;
+      case 'set-end': setRangeFromCurrent('e'); break;
+      case 'pv-play': {
+        var v = byId('pv');
+        if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause();
+        break;
+      }
+      case 'hand': {
+        state.hand = el.getAttribute('data-hand');
+        var bs = document.querySelectorAll('#hand-seg button');
+        for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-pressed', String(bs[i] === el));
+        break;
+      }
+      case 'jump': jumpTo(parseFloat(el.getAttribute('data-t')), parseInt(el.getAttribute('data-idx'), 10)); break;
+      case 'rv-play': toggleResultPlay(); break;
+      case 'rate': {
+        state.rate = parseFloat(el.getAttribute('data-rate'));
+        var rv = byId('rv'); if (rv) rv.playbackRate = state.rate;
+        var rb = document.querySelectorAll('#rate-seg button');
+        for (var j = 0; j < rb.length; j++) rb[j].setAttribute('aria-pressed', String(rb[j] === el));
+        break;
+      }
+      case 'skel':
+        state.showSkeleton = !state.showSkeleton;
+        el.setAttribute('aria-pressed', String(state.showSkeleton));
+        drawOverlay();
+        break;
+      default: break;
+    }
+  }
+
+  function init() {
+    document.addEventListener('click', onClick);
+    byId('file-input').addEventListener('change', function (e) { onFile(e.target.files && e.target.files[0]); });
+    byId('rs').addEventListener('input', function () { onRangeInput('s'); });
+    byId('re').addEventListener('input', function () { onRangeInput('e'); });
+    var pv = byId('pv');
+    ['timeupdate', 'seeked', 'play', 'pause', 'loadeddata'].forEach(function (t) { pv.addEventListener(t, updatePreviewUI); });
+    bindScrub(byId('pv-seek'), function () { return state.duration || 0; }, function (t) { pv.currentTime = t; updatePreviewUI(); });
+    var rv = byId('rv');
+    rv.addEventListener('play', startLoop);
+    ['seeked', 'loadeddata', 'pause', 'timeupdate'].forEach(function (t) { rv.addEventListener(t, drawOverlay); });
+    bindScrub(byId('tl-track'), function () { var d = tlDomain(); return d[1] - d[0]; }, function (t) { rv.pause(); rv.currentTime = tlDomain()[0] + t; drawOverlay(); });
+    window.addEventListener('resize', function () { if (state.screen === 'result') drawOverlay(); });
+    show('guide');
+  }
+
+  window.ArcheryApp = {
+    state: state, renderResult: renderResult, show: show, drawOverlay: drawOverlay, jumpTo: jumpTo,
+    showAnalysisError: showAnalysisError, showFatal: showFatal, pickPose: pickPose, buildTimes: buildTimes, onClick: onClick
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>
