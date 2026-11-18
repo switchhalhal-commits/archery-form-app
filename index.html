@@ -656,6 +656,9 @@ details.all .mlist{margin-top:var(--sp-2)}
  *   v1.2：短い時間窓（速度の差分・移動平均・区間の途切れ・指標の平均をとるフレーム）はすべて実時間（15fps 換算、CFG.baseSec）で
  *         扱い、30/60fps・可変間隔の入力でも 15fps と等価に動く。弓手首は必須点から外し（M2・M7・M10 だけが使う）、
  *         全体に可視度が低い動画では主要点のゲートを下げる。入力条件で測れない・不確かな部分は「測定できず／参考値」と確信度に反映する
+ *   v1.3：エイミングの最後のフレームにリリースの動き始めが入っていれば手前で切る（aimEndOf）。測定ノイズにサンプリング誤差の下限
+ *         （スケールの 2%）と M10 の時点の丸めを加え、閾値の前後に必ず参考値の帯（不感帯）を置く。良かった点は指摘と同じ動きを
+ *         測る指標を避け、目安ぎりぎりなら控えめな文言にする。総合コメントは指摘カードの注記と食い違わない言い方にする
  *
  * 変更履歴
  *   v1.0.0（2026-11-16）初版：M1〜M12、フェーズ検出、カメラ揺れの推定、体軸基準の相対指標
@@ -666,11 +669,15 @@ details.all .mlist{margin-top:var(--sp-2)}
  *          （ドローの速さに対する比・頑健な最小距離・位置による補正）、途中から始まる動画（アンカー到達が映っていなければ確信度を
  *          下げ、M3・M4・M5・M11 の「目安内」を参考値に）、弓腕が画面外（弓手首なしでもフェーズ検出・M2・M7・M10 は測定できず）、
  *          逆光（可視度のゲートの適応）、リリース後の時点をサブフレームのリリース時刻から数える。research.md の閾値は変更なし
+ *   v1.3.0（2026-11-18）診断品質の仕上げ（ROUND3.md）：アドバイス文言を research.md §3 と照合して修正（M1・M2・M3・M4・M6・M7・M11）、
+ *          境界の安定化（エイミング末尾に入ったリリースの動き始めの除外、測定ノイズの下限＝参考値の不感帯、M10 の時点の丸め）、
+ *          リリースの第 2 の代替検出（顔に対する後方への変位）、良かった点の選び方（指摘と関連する指標を避ける・文言の強さ）、
+ *          総合コメントの整合（2 文以内・揺れ／信頼性の注記と一致）。research.md の閾値は変更なし
  */
 var ArcheryLogic = (function () {
   'use strict';
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.3.0';
 
   /* ---------- ランドマーク番号（MediaPipe Pose 33 点） ---------- */
   var SIDE = {
@@ -799,7 +806,16 @@ var ArcheryLogic = (function () {
                           //   どの射も解析できなかった）。下げたゲートで採用した点は「可視度の低い点」として扱い、確信度・信頼性を下げる
     lowVisWeight: 0.75,   // 確信度 valid：可視度の低い点を含むフレームはこの重みで数える（補間フレームは従来どおり 0.5）
     armMissingFrac: 0.4,  // 片方の手首が全フレームのこの割合以上で欠損し、フェーズを検出できなかった場合は専用の案内を出す
-    followTimeErrFrames: 0.25 // M7・M8 の「リリース 0.5 秒後」の時点の不確かさのうち、リリース時刻の推定誤差（フレーム単位。v1.1 の
+    // ---- v1.3 診断品質の仕上げ（ROUND3.md） ----
+    aimStepMin: 0.012,    // エイミングの最後のフレームに入ったリリースの動き始め（aimEndOf）：基準位置からの後方への段差の下限（W、約 0.5cm）。
+                          //   理想形のエクスパンション（2.5 秒で 4mm）は 0.2 秒で 0.001W 未満なので、これを超えない
+    aimStepK: 4,          //   段差の判定はこの倍率 × 手首のジッタ σ（基準の平均の誤差を含む）以上。検出ノイズだけで切らない
+    aimStepBaseSec: 0.3,  //   基準位置は、最後のフレームの 1.5·baseSec より前の、この長さの区間の平均
+    goodClose: 0.5,       // 良かった点：理想の中央からの近さ（closeness。0＝中央、1＝目安の端）がこれ以下なら指標ごとの褒める文言、
+                          //   超えれば「目安の範囲内でした」と値だけを伝える（目安ぎりぎりの値を「きれいに」と言わない）
+    sampleErrFrac: 0.02,  // 測定ノイズの下限（指標のスケールの 2%）：フレームの位相・丸めによる誤差（estimateNoise）。ノイズのない
+                          //   合成データで位相を 8 通りずらしたとき、M3・M4・M5 の値は閾値付近で ±3% 動いた。参考値の帯は ±4%
+    followTimeErrFrames: 0.25, // M7・M8 の「リリース 0.5 秒後」の時点の不確かさのうち、リリース時刻の推定誤差（フレーム単位。v1.1 の
                           //   フェーズ精度テストでサブフレームのリリース時刻の誤差は ±0.25 フレーム以内）
   };
   var KEY_PT = (function () {
@@ -1538,6 +1554,21 @@ var ArcheryLogic = (function () {
           }
         }
       }
+      if (release < 0 && rel[anchor]) {
+        // v1.3：第 2 の代替。顔に対する引き手首の位置が、保持中の位置（中央値）から後方（的と逆方向）へ fallbackAway 以上
+        //   離れたフレーム。頭が正面を向いて映る（鼻・口が引き手の真上にある）動画では、引き手が後方へ動いても
+        //   顔からの「距離」はあまり伸びず、弱いリリース（後方へ 12cm 動いてアンカー位置へ戻る）を速度でも距離でも
+        //   検出できないことがあった（検出ノイズ σ=0.002 で 10 通り中 1〜3 回 no-release）。従来の 2 つの規則で
+        //   見つからない場合だけ使うので、従来どおり検出できる動画の結果は変わらない
+        var ru = [];
+        for (k = anchor; k <= run.e; k++) if (rel[k]) ru.push(rel[k].u);
+        var hu0 = median(ru);
+        for (k = anchor + 1; isNum(hu0) && k <= scanEnd; k++) {
+          if (!rel[k]) continue;
+          var bu2 = rel[k].u - hu0;
+          if (bu2 < -CFG.fallbackAway) { release = k - 1; method = 'displacement'; break; }
+        }
+      }
       if (release < 0) return { ok: false, code: 'no-release' };
       // 動きが 2 フレームにまたがる場合に備え、動き始める直前の静止フレームまで遡る（速さは baseSec 前のフレームから）
       while (release - 1 > anchor && isNum(wristSpeed(t, S, release)) && wristSpeed(t, S, release) >= CFG.releaseOnset) release--;
@@ -1688,7 +1719,7 @@ var ArcheryLogic = (function () {
       joints: ['B.s', 'D.s'], guide: 'shoulders',
       title: function () { return '弓側の肩が上がる傾向があります'; },
       checkpoint: 'フルドローで弓側の肩は低く、両肩のラインは水平に保つ。',
-      why: 'World Archery（旧 FITA）コーチングマニュアルでは、押し手の肩は矢のラインより低くあるべきで、肩が上がると背中の力（バックテンション）が使えず、エイミング中に肩がさらに上がり続けるとしています。Naomi Folkard 選手も「肩は終始ニュートラルな高さに。上げも下げもしない」と解説しています。',
+      why: 'World Archery（旧 FITA）コーチングマニュアルでは、押し手の肩は矢のラインより低くあるべきで、肩が上がると背中の力（バックテンション）が使えず、エクスパンション中に肩がさらに上がり続けるとしています。Naomi Folkard 選手も「肩は終始ニュートラルな高さに。上げも下げもしない」と解説しています。',
       source: 'World Archery／FITA コーチングマニュアル、Bow International（Naomi Folkard）',
       cue: '弓側の肩をポケットに入れるように下げて、鎖骨を肋骨にのせる',
       drills: ['壁押しドリル（ドア枠に弓腕を押し当て、肩甲骨を下げたまま押す感覚を確認）', '軽いポンドでの素引き'],
@@ -1699,7 +1730,7 @@ var ArcheryLogic = (function () {
       joints: ['D.e', 'B.s', 'B.w'], guide: 'bowline',
       title: function (m) { return m.variant === 'high' ? '引き肘が矢のラインより上がりすぎる傾向があります' : '引き肘が矢のラインより下がる傾向があります'; },
       checkpoint: '引き肘は矢のライン上か、やや上にある。',
-      why: 'KSL／NTS では、引き肘は矢と一直線か、やや上を向くとしています。Dr James Park（Bow International）は、引き肘が力のライン（ドローフォースライン）上にあれば腕の筋肉を使わず背中の大きな筋肉だけで保持でき、ラインから外れると引き手に横方向の力がかかると解説しています。',
+      why: 'KSL／NTS では、引き肘は矢と一直線か、やや上を向くとしています。FITA コーチングマニュアルも、引き肘は矢のラインより高い平面にあり、弓手のグリップ中心・アンカーした手・引き肘が一直線になるとしています。Dr James Park（Bow International）は、引き肘が力のライン（ドローフォースライン）上にあれば腕の筋肉を使わず背中の大きな筋肉だけで保持でき、ラインから外れると引き手に横方向の力がかかると解説しています。',
       source: 'USA Archery NTS（KiSik Lee）、FITA コーチングマニュアル、Bow International（Dr James Park）',
       cue: '肘で引く。肘を矢のラインにのせる',
       drills: ['LAN2 意識（上腕三頭筋の裏の点を意識して引く）', 'ゴムバンドで肘の軌道練習', '鏡で肘の高さを確認'],
@@ -1708,9 +1739,9 @@ var ArcheryLogic = (function () {
     {
       id: 'M3', name: 'アンカーの安定性', phase: 'エイミング', thr: 0.04, scale: 0.04, weight: 1,
       joints: ['D.w', 'H'], guide: 'anchor',
-      title: function () { return 'エイミング中にアンカー位置が動いているようです'; },
-      checkpoint: 'アンカーは毎回同じ場所に当て、保持中も動かさない。',
-      why: 'FITA コーチングマニュアルでは、アンカー（ドローレファレンスポイント）をすべての基本技術の中で最も重要としています。NTS では顎の下・頬骨の下に人差し指の第1関節を当て、手の甲で下顎を包み、手と顎の間に隙間を作らないことを求めます。',
+      title: function () { return 'エイミング中にアンカー位置が動き、アンカーが不安定なようです'; },
+      checkpoint: 'アンカーは毎回同じ場所に当てる（エイミング中も同じ位置に保つ）。',
+      why: 'FITA コーチングマニュアルでは、アンカー（ドローレファレンスポイント）をすべての基本技術の中で最も重要としています。NTS では顎の下・頬骨の下に第1関節を当て、手の甲で下顎を包み、手と顎の間に隙間を作らないことを求めます。',
       source: 'FITA コーチングマニュアル、USA Archery NTS',
       cue: '毎回同じ場所に、顎の骨に当てる',
       drills: ['近射でアンカー確認（的を見ずにアンカーの感覚だけに集中）', 'ミラー練習'],
@@ -1721,7 +1752,7 @@ var ArcheryLogic = (function () {
       joints: ['D.w'], guide: 'path',
       title: function () { return 'エイミング中に引き手が前へ戻っているようです（クリーピング）'; },
       checkpoint: 'フルドローで引き手が前へクリープしない。',
-      why: 'World Archery コーチングマニュアルの着弾分析では、矢が下に集まるときはフルドローで前にクリープしていないかを確認します。引き手が前に出るとドローレングスと矢速が落ち、低く不安定な着弾になりやすくなります（ArcheryBuddy）。',
+      why: 'World Archery コーチングマニュアルの着弾分析では、矢が下に着弾するときはフルドローで前にクリープしていないかを確認します。リリース時に引き手が前に出るとドローレングスと矢速が落ち、低く不安定な着弾になります（ArcheryBuddy）。',
       source: 'World Archery Coach’s Manual、ArcheryBuddy',
       cue: '背中で引き続けながら狙う。止まらず、押し切る',
       drills: ['クリッカー練習', 'ゴムバンドで背中の締めを感じる練習', 'エクスパンション意識の素引き'],
@@ -1743,7 +1774,7 @@ var ArcheryLogic = (function () {
       joints: ['D.w'], guide: 'path',
       title: function () { return 'リリースで引き手が顔から離れる方向へ動いている可能性があります（プラッキング疑い）'; },
       checkpoint: 'リリースで引き手は横・外へはじかず、顔に沿ってまっすぐ後ろへ流れる。',
-      why: 'プラッキングは、リリースで指を外向きに開いたり手を顔から引き離したりして、引き手が横・外へ動くことで、矢が左右にぶれる原因になります。引き手は首・耳の近くで終わるよう、顔に沿って後ろへ流すのが直し方です（ArcheryBuddy）。BowBasics は「指を完全にリラックスさせ、弦が指の間をすり抜けるイメージ」を勧めています。',
+      why: 'プラッキングは、リリースで指を外向きに開いたり手を顔から引き離したりして、引き手が横・外へ動くことで、矢が左右にぶれる原因になります。引き手は首・耳の近くで終わるよう、顔に沿って後ろへ流すのが直し方です（ArcheryBuddy）。BowBasics は「指を完全にリラックスさせ、弦が手のひらの穴をすり抜けるイメージ」を勧めています。',
       source: 'ArcheryBuddy、BowBasics',
       cue: '指の力を抜いて、弦に指を押し出させる',
       drills: ['ブランクベイル（2〜5 m、的紙なしでリリースの質だけに集中）', '目を閉じたリリース練習', '鏡・動画で確認'],
@@ -1754,7 +1785,7 @@ var ArcheryLogic = (function () {
       joints: ['B.w'], guide: 'path',
       title: function () { return 'リリース後に弓腕が下がっているようです'; },
       checkpoint: 'リリース後も弓腕は的に向けたまま残す。',
-      why: 'NTS では、リリース後もすべて静止し、両手首と肩を結ぶ仮想の直線（Barrel of the Gun）を的に向け続けます。弓腕がリリース前後に下がると矢が低く入りやすく、初心者に最も多いミスの一つとされています（ArcheryBuddy）。',
+      why: 'NTS では、リリース後もすべて静止し、両手首と肩を結ぶ仮想の直線（Barrel of the Gun）を的に向け続けます。弓腕がリリース前後に下がると矢が低く入り、最も多い初心者のミスとされています。矢が的に届くまで弓腕を保持します（ArcheryBuddy）。',
       source: 'USA Archery NTS、ArcheryBuddy',
       cue: '矢が的に届くまで弓腕を残す（残身）',
       drills: ['残身 2 秒キープ', 'スリングで弓を自然に落とす感覚をつかむ練習'],
@@ -1796,7 +1827,7 @@ var ArcheryLogic = (function () {
     {
       id: 'M11', name: 'エイミング時間', phase: 'エイミング', thr: 5, scale: 5, weight: 1,
       joints: ['D.w'], guide: null,
-      title: function () { return 'エイミング時間が長めです'; },
+      title: function () { return 'エイミング時間が長めです（狙いすぎ）'; },
       checkpoint: 'エイミングは 1〜3 秒が目安。',
       why: 'NTS ではエイミングは 3 秒までが目安です。長時間の保持はブレやコラプシングの原因になります。',
       source: 'USA Archery NTS',
@@ -1996,7 +2027,10 @@ var ArcheryLogic = (function () {
       var idx = pick(within(t, p, -bs, bs), 'M10');
       if (!idx.length) { out.M10 = na('missing'); return; }
       var v = mean(idx.map(function (k) { return Math.abs(SIG.M10(S, k)); }));
-      out.M10 = { value: v, at: at(p), range: [at(p), at(p)], frame: p, terms: [[idx, 1]] };
+      // v1.3：セットアップのピーク（弓手首が肩の高さに達したフレーム）はフレームに丸められるため、両手が動いている
+      //   時点の値はフレームの位相で変わる（閾値付近で ±5%）。その傾きを測定ノイズに加える（timeSlope、丸めのみ）
+      var s10 = slopeAt('M10', p);
+      out.M10 = { value: v, at: at(p), range: [at(p), at(p)], frame: p, terms: [[idx, 1]], timeSlope: isNum(s10) ? Math.abs(s10) : NaN, timeRoundOnly: true };
     })();
 
     // M11 エイミング時間
@@ -2080,11 +2114,17 @@ var ArcheryLogic = (function () {
       //   傾き × σt 変わる。σt はフレームへの丸め（Δt／√12）とリリース時刻の推定誤差（約 0.25 フレーム）の合成
       var timePart = 0;
       if (isNum(nz) && isNum(m.timeSlope)) {
-        var fdt = frameDt(t), st = Math.sqrt(fdt * fdt / 12 + Math.pow(CFG.followTimeErrFrames * fdt, 2));
+        var fdt = frameDt(t), st = Math.sqrt(fdt * fdt / 12 + (m.timeRoundOnly ? 0 : Math.pow(CFG.followTimeErrFrames * fdt, 2)));
         timePart = Math.abs(m.timeSlope) * st;
         nz = Math.sqrt(nz * nz + timePart * timePart);
       }
-      out[id] = { noise: nz, jitter: s, refPart: extra || 0, timePart: timePart };
+      // v1.3：サンプリング（フレームの位相・丸め）による誤差の下限。白色ノイズの推定（4 階の残差）には現れないため、
+      //   ノイズのない入力では推定ノイズが 0 になり、閾値の ±1〜2% でフレームの位相だけで「指摘」と「目安内」が直接
+      //   入れ替わっていた（M3・M4・M5）。スケールの sampleErrFrac 倍を二乗和で加え、閾値の前後に参考値の帯
+      //   （不感帯＝ヒステリシスの幅 2 × この値）を必ず設ける。M11 は時刻の丸めそのものをノイズとしているので加えない
+      var floorPart = id === 'M11' ? 0 : CFG.sampleErrFrac * d.scale;
+      if (isNum(nz) && floorPart > 0) nz = Math.sqrt(nz * nz + floorPart * floorPart);
+      out[id] = { noise: nz, jitter: s, refPart: extra || 0, timePart: timePart, floorPart: floorPart };
     });
     return out;
   }
@@ -2300,20 +2340,50 @@ var ArcheryLogic = (function () {
     };
   }
 
+  /* v1.3：良かった点に選ばない組み合わせ。指摘（または目安を超えた参考値）と同じ動きを別の角度から測る指標は、
+   * 目安内でも「良かった点」として褒めると指摘と食い違う（例：コラプシング〈肘が下がる〉を指摘しながら
+   * 「引き肘が矢のライン上にきれいにのっています」、プラッキングを指摘しながら「引き手が首の後ろ方向へしっかり流れています」）。
+   *   M2 引き肘のライン と M5 コラプシング（どちらも引き肘の高さ）
+   *   M3 アンカーの安定性 と M4 クリーピング（どちらもエイミング中の顔に対する引き手の位置）
+   *   M6 プラッキング と M8 引き手のフォロースルー（どちらもリリース後の引き手の軌道） */
+  var GOOD_RELATED = { M2: ['M5'], M5: ['M2'], M3: ['M4'], M4: ['M3'], M6: ['M8'], M8: ['M6'] };
+
+  function goodText(m) {
+    var x = m.value;
+    if (m.id !== 'M11') return m.def.good;
+    return 'エイミング時間が ' + x.toFixed(1) + ' 秒で、NTS の目安（1〜3 秒）' + (x >= 1 && x <= 3 ? 'の範囲内です。' : 'に近い長さです。');
+  }
+  /* 目安内だが理想の中央からは離れている／指摘と関連する指標：言い過ぎない（「きれいに」「しっかり」などの表現を使わない） */
+  function plainGoodText(m) { return '「' + m.name + '」は目安の範囲内でした（' + m.valueText + '、' + m.thresholdText + '）。'; }
+
   function pickGood(metrics) {
     var cands = metrics.filter(function (m) { return m.status === 'ok' && isNum(m.closeness); });
     if (!cands.length) return null;
+    // 指摘・目安を超えた参考値と同じ動きを測る指標は、ほかに候補があれば選ばない
+    var bad = {};
+    metrics.forEach(function (m) {
+      if (m.status === 'flag' || (m.status === 'ref' && m.refSide === 'above')) (GOOD_RELATED[m.id] || []).forEach(function (r) { bad[r] = true; });
+    });
+    var unrelated = cands.filter(function (m) { return !bad[m.id]; });
+    var related = !unrelated.length;
+    if (!related) cands = unrelated;
     // 信頼性「低」の指標は、ほかに候補があれば選ばない（ノイズで偶然よく見えている可能性があるため）
     var solid = cands.filter(function (m) { return !m.reliability || m.reliability.key !== 'low'; });
     if (solid.length) cands = solid;
     cands.sort(function (a, b) { return a.closeness - b.closeness || DEFS.indexOf(a.def) - DEFS.indexOf(b.def); });
     var m = cands[0];
-    var text = m.def.good;
-    if (m.id === 'M11') text = 'エイミング時間が ' + m.value.toFixed(1) + ' 秒で、NTS の目安（1〜3 秒）に近い長さです。';
-    return { id: m.id, name: m.name, phase: m.phase, text: text, value: m.valueText, unit: m.unitText, threshold: m.thresholdText, at: m.at, frame: m.frame, pathRange: m.pathRange, joints: m.def.joints.slice(), guide: m.def.guide, reliability: m.reliability };
+    // 関連する指標しか残らない場合は、褒める文言にせず「目安の範囲内」とだけ伝える
+    var strong = !related && m.closeness <= CFG.goodClose;
+    var text = strong ? goodText(m) : plainGoodText(m);
+    return { id: m.id, name: m.name, phase: m.phase, text: text, strong: strong, closeness: m.closeness, value: m.valueText, unit: m.unitText, threshold: m.thresholdText, at: m.at, frame: m.frame, pathRange: m.pathRange, joints: m.def.joints.slice(), guide: m.def.guide, reliability: m.reliability };
   }
 
-  function summarize(metrics, flagged, good, lowConf) {
+  /* 総合コメント（1〜2 文）。v1.3：指摘カードの内容・注記と食い違わないようにする
+   *   ・指摘 0 件 … 否定的な総括をしない（「目安を超えました」「見直す」を使わない）。参考値があれば「はっきり超えた項目はない」と言う
+   *   ・指摘あり … 件数と最も差が大きい指標（＝1 枚目のカード）に触れる。カードが「参考値」の注記つき（確信度が低い・
+   *     カメラの揺れが大きい・信頼性が低い）なら、総括でも断定しない
+   *   ・「理想に近い」と言うのは、良かった点が理想の中央に近い（strong）ときだけ */
+  function summarize(metrics, flagged, good, lowConf, shakeHigh) {
     var measured = metrics.filter(function (m) { return m.status !== 'na'; }).length;
     var naN = metrics.length - measured;
     var refs = metrics.filter(function (m) { return m.status === 'ref'; });
@@ -2321,20 +2391,25 @@ var ArcheryLogic = (function () {
     // v1.2：参考値の理由ごとに書き分ける（ノイズの範囲内／動画がフルドローの途中から始まり、映っている範囲だけで測った値）
     var names = function (l) { return l.map(function (m) { return '「' + m.name + '」'; }).join(''); };
     var rn = refs.filter(function (m) { return m.refReason !== 'partial'; }), rp = refs.filter(function (m) { return m.refReason === 'partial'; });
-    var partialTxt = rp.length ? names(rp) + 'は動画がフルドローの途中から始まり、映っている範囲だけで測った値のため参考値です。' : '';
     if (!flagged.length) {
       var first = '測定できた' + measured + '項目' + (refs.length ? 'に、目安をはっきり超えた項目はありませんでした' : 'は、すべて目安の範囲に収まりました') + tailNa + '。';
-      if (lowConf) return first + 'ただし、' + NOTE_LOWCONF + '。' + partialTxt;
-      if (refs.length) return first + (rn.length ? names(rn) + 'は目安との差が測定ノイズの範囲内のため参考値です。' : '') + partialTxt;
-      return first + (good ? '特に「' + good.name + '」は理想に近い値です。' : '');
+      if (lowConf) return first + 'ただし、' + NOTE_LOWCONF + (rp.length ? '（' + names(rp) + 'は動画がフルドローの途中から始まり、映っている範囲だけで測った値）' : '') + '。';
+      if (refs.length) {
+        // 2 文目は 1 文にまとめる（ノイズの範囲内の項目と、映っている範囲だけで測った項目）
+        var parts = [];
+        if (rn.length) parts.push(names(rn) + 'は目安との差が測定ノイズの範囲内');
+        if (rp.length) parts.push(names(rp) + 'は動画がフルドローの途中から始まり、映っている範囲だけで測った値');
+        return first + parts.join('、') + 'のため参考値です。';
+      }
+      return first + (good && good.strong ? '特に「' + good.name + '」は理想に近い値です。' : '');
     }
     var top = flagged[0];
-    if (lowConf) {
-      return '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超えた可能性があります' + tailNa + '。' +
-        '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）ですが、フェーズ検出の確信度が低いため参考値です。';
-    }
-    return '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超えました' + tailNa + '。' +
-      '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）で、まずはここから見直すのがおすすめです。';
+    var head = '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超え';
+    var topTxt = '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）';
+    if (lowConf) return head + 'た可能性があります' + tailNa + '。' + topTxt + 'ですが、フェーズ検出の確信度が低いため参考値です。';
+    if (shakeHigh) return head + 'ました' + tailNa + '。' + topTxt + 'ですが、カメラの揺れが大きいため参考値です。';
+    if (top.reliability && top.reliability.key === 'low') return head + 'ました' + tailNa + '。' + topTxt + 'ですが、測定の信頼性が低いため参考値です。';
+    return head + 'ました' + tailNa + '。' + topTxt + 'で、まずはここから見直すのがおすすめです。';
   }
 
   var ERRORS = {
@@ -2355,6 +2430,32 @@ var ArcheryLogic = (function () {
     //   10〜45ms 手前に出ることがあり、区切りが動いてリリースの検出が 1 フレーム早まる循環が起きたため採用していない。
     //   可変間隔の入力でリリース直前のフレームに動き始めの一部が入る弱点は build-result-3.json に残す）
     while (k > ph.anchor && !Braw.valid[k]) k--;
+    // v1.3：リリース直前と判定したフレームに、リリースの動き始めの一部が入っていれば、エイミングをその手前で終える。
+    //   リリースの検出は「動き始めの速度（releaseOnset）未満の最後のフレーム」なので、フレームの位相によっては
+    //   リリースの 0〜15ms 後のフレーム（引き手がすでに最大 0.04W 後方へ動いている）がエイミングの最後に入り、
+    //   M3・M4 が閾値の約 2 割ずれていた（15fps でも位相しだいで起きる。v1.2 の W8 と同じ原因）。
+    //   判定は平滑化前の系列（Braw）で行うので、平滑化の区切りに依存しない（v1.2 で試した releaseT 方式の循環は起きない）
+    var bs = CFG.baseSec, t = Braw.t, S = Braw.S;
+    function rel(i) { return Braw.valid[i] && !Braw.interp[i] && S.wD[i] && S.H[i] ? { u: S.wD[i].u - S.H[i].u, v: S.wD[i].v - S.H[i].v } : null; }
+    var base = [], j;
+    for (j = k; j > ph.anchor && t[k] - t[j] <= CFG.aimStepBaseSec + 1.5 * bs; j--) {
+      if (t[k] - t[j] < 1.5 * bs) continue;
+      var q = rel(j);
+      if (q) base.push(q);
+    }
+    if (base.length < 2) return k;
+    var bu = mean(base.map(function (q) { return q.u; })), bv = mean(base.map(function (q) { return q.v; }));
+    if (!isNum(Braw.stepJit)) Braw.stepJit = wristJitter(Braw);
+    var thr = Math.max(CFG.aimStepMin, CFG.aimStepK * Braw.stepJit * Math.sqrt(1 + 1 / base.length));
+    var cut = -1;
+    for (j = k; j > ph.anchor && t[k] - t[j] < 1.5 * bs; j--) {
+      var p = rel(j);
+      if (!p) continue;
+      var du = p.u - bu, dv = p.v - bv;
+      // 後方（的と逆方向）への動きを含み、大きさが閾値を超えるフレーム
+      if (du < 0 && hyp(du, dv) > thr) cut = j;
+    }
+    if (cut > ph.anchor + 1) { k = cut - 1; while (k > ph.anchor && !Braw.valid[k]) k--; }
     return k;
   }
 
@@ -2516,7 +2617,7 @@ var ArcheryLogic = (function () {
     base.flaggedCount = flagged.length;
     base.refCount = metrics.filter(function (m) { return m.status === 'ref'; }).length;
     base.good = good;
-    base.summary = summarize(metrics, flagged, good, conf.low);
+    base.summary = summarize(metrics, flagged, good, conf.low, shake.high);
     base.skippedShots = ph.skipped || [];
     base.series = seriesOf(t, Braw, B, sch);
     return base;
@@ -2621,7 +2722,8 @@ var ArcheryLogic = (function () {
       prepare: prepare, fillGaps: fillGaps, detectSides: detectSides, orient: orient, buildBody: buildBody, detectPhases: detectPhases,
       estimateShake: estimateShake, computeMetrics: computeMetrics, evaluate: evaluate, rolesFor: rolesFor, headRefImg: headRefImg,
       smoothSchedule: smoothSchedule, smoothSeries: smoothSeries, smoothLandmarks: smoothLandmarks, noiseGain: noiseGain,
-      phaseConfidence: phaseConfidence, estimateNoise: estimateNoise, refineRelease: refineRelease, findRunsHyst: findRunsHyst, hedge: hedge
+      phaseConfidence: phaseConfidence, estimateNoise: estimateNoise, refineRelease: refineRelease, findRunsHyst: findRunsHyst, hedge: hedge,
+      pickGood: pickGood, summarize: summarize, aimEndOf: aimEndOf, GOOD_RELATED: GOOD_RELATED
     }
   };
 })();
