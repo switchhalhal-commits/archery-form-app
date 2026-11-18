@@ -278,6 +278,18 @@ details.why .src{font-size:var(--fs-xs);color:var(--ink-3);margin-top:6px}
 .pill.flag{background:var(--accent);color:#fff}
 .pill.ok{background:var(--accent-soft);color:var(--accent-ink)}
 .pill.na{background:var(--surface-2);color:var(--ink-3)}
+.pill.ref{background:var(--warn-soft);color:var(--warn)}
+.m-meta{display:block;margin-top:2px;color:var(--ink-3)}
+.rel{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:1px 7px;border-radius:var(--r-full);border:1px solid var(--line-strong);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.rel.high{border-color:var(--accent-soft-2);color:var(--accent-ink);background:var(--accent-soft)}
+.rel.low{border-color:transparent;color:var(--warn);background:var(--warn-soft)}
+.ev-noise{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--ink-3);margin-top:6px}
+.f-notes{display:grid;gap:6px}
+.data-card{display:grid;gap:12px;margin-top:16px}
+.data-card h3{font-size:var(--fs-base);font-weight:750;display:flex;align-items:center;gap:8px}
+.data-card h3 .icon{color:var(--accent-ink)}
+.data-card p{font-size:var(--fs-sm);color:var(--ink-2);line-height:1.6}
+.data-card .data-meta{font-size:var(--fs-xs);color:var(--ink-3)}
 details.all > summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:var(--fs-base);min-height:28px}
 details.all > summary::-webkit-details-marker{display:none}
 details.all > summary .chev{margin-left:auto;color:var(--ink-3);transition:transform .2s ease}
@@ -340,6 +352,7 @@ details.all .mlist{margin-top:var(--sp-2)}
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-shake" viewBox="0 0 24 24"><rect x="7.5" y="4" width="9" height="16" rx="2"/><path d="M3.5 8.5v7"/><path d="M20.5 8.5v7"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5V15"/><path d="M7 10l5 5 5-5"/><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></symbol>
     <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11"/><path d="M9 12h11"/><path d="M9 17.5h11"/><path d="M4.5 6.5h.01"/><path d="M4.5 12h.01"/><path d="M4.5 17.5h.01"/></symbol>
     <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9.5 2.5v3M14.5 2.5v3M9.5 18.5v3M14.5 18.5v3M2.5 9.5h3M2.5 14.5h3M18.5 9.5h3M18.5 14.5h3"/></symbol>
     <symbol id="i-skeleton" viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.1"/><path d="M12 7.5v6.5"/><path d="M12 14l-3 6.5"/><path d="M12 14l3 6.5"/><path d="M5 9.5l7 1 7-1"/><circle cx="5" cy="9.5" r=".6"/><circle cx="19" cy="9.5" r=".6"/></symbol>
@@ -583,6 +596,13 @@ details.all .mlist{margin-top:var(--sp-2)}
     </details>
   </div>
 
+  <div class="card data-card" id="data-card">
+    <h3><svg class="icon"><use href="#i-download"/></svg>解析データ（閾値の調整用）</h3>
+    <p>測定値・信頼性・測定ノイズの推定・フェーズの時刻と確信度、体の軸を基準にした関節の座標の時系列を JSON ファイルで保存します。実際の射のデータで目安（閾値）を見直すときに使います。動画・画像・ファイル名は含みません。</p>
+    <button class="btn soft" data-action="export" id="btn-export"><svg class="icon"><use href="#i-download"/></svg>解析データを保存（JSON）</button>
+    <div class="data-meta" id="data-meta"></div>
+  </div>
+
   <p class="disclaimer">この結果は、骨格推定による測定にもとづく目安です。数値の閾値は指導文献（World Archery コーチマニュアル、USA Archery NTS など）の定性的な基準をもとにしたアプリの運用値で、体格や撮影条件で変わります。フォームの最終的な判断は、コーチや実際の着弾とあわせて行ってください。</p>
   <div class="btn-row" style="margin-top:16px">
     <button class="btn sec" data-action="back-setup"><svg class="icon"><use href="#i-scissors"/></svg>区間を変えて再解析</button>
@@ -617,17 +637,40 @@ details.all .mlist{margin-top:var(--sp-2)}
  * 入力 : frames = [{ t: 動画内の秒, lm: MediaPipe Pose の正規化ランドマーク 33 点 [{x,y,z,visibility}] | null }]
  *        opts   = { width, height（解析画像の画素数。縦横比の補正に使う）, handedness: 'auto' | 'right' | 'left' }
  * 出力 : ArcheryLogic.analyze(frames, opts)
- *        → { ok, error, hand, phases, segments, shake, metrics, findings, good, summary, ... }
+ *        → { ok, error, hand, phases, segments, shake, quality, metrics, findings, good, summary, series, ... }
+ *        ArcheryLogic.exportData(analysis, meta) → 閾値チューニング用の JSON オブジェクト
  *
  * 指標・閾値・アドバイスは research.md §3 の対応表（M1〜M12）に準拠する。
  * 座標は「体の軸」基準：原点＝肩中点、横軸＝腰ライン（的の方向を正）、縦軸＝下向き正、単位＝肩幅 W。
  * 手持ち撮影による回転（ロール）は、下半身の脚軸（足首中点→腰中点）のフレームごとの傾きで追従し、
  * 水平の基準は腰ラインの中央値とする。並進は肩中点を原点にすることで、拡大縮小は肩幅で割ることで打ち消す。
+ *
+ * 処理の流れ（v1.1）
+ *   1. 整形：縦横比補正、visibility ゲーティング（主要点は 0.5 未満を欠損扱い）
+ *   2. 欠損補間：0.25 秒以下の欠損は線形補間。それより長い欠損は補間せず、そのフレームを無効にする
+ *   3. 利き手・的の方向の判定、左右ラベルの補正
+ *   4. 適応平滑化：画像空間のランドマークに速度適応型フィルタ（One Euro 相当・前後 2 方向。デッドゾーンは推定ジッタに比例）
+ *   5. 体軸座標系への変換 → フェーズ検出（ヒステリシス・最小持続時間・欠損をまたぐ区間・サブフレームのリリース時刻）
+ *      → アンカー到達・リリースで平滑化を区切り直して再検出（区切りと検出結果が一致するまで）→ 確信度
+ *   6. 指標の算出 → 指標ごとの測定ノイズ推定・信頼性グレード → ルール評価（閾値との差がノイズの 2 倍未満は参考値）
+ *   v1.2：短い時間窓（速度の差分・移動平均・区間の途切れ・指標の平均をとるフレーム）はすべて実時間（15fps 換算、CFG.baseSec）で
+ *         扱い、30/60fps・可変間隔の入力でも 15fps と等価に動く。弓手首は必須点から外し（M2・M7・M10 だけが使う）、
+ *         全体に可視度が低い動画では主要点のゲートを下げる。入力条件で測れない・不確かな部分は「測定できず／参考値」と確信度に反映する
+ *
+ * 変更履歴
+ *   v1.0.0（2026-11-16）初版：M1〜M12、フェーズ検出、カメラ揺れの推定、体軸基準の相対指標
+ *   v1.1.0（2026-11-17）測定の信頼性の強化（IMPROVE.md）：visibility ゲーティングと欠損の扱い、適応平滑化、
+ *          フェーズ検出のヒステリシス・最小持続時間・サブフレームのリリース時刻・確信度、指標ごとの測定ノイズと
+ *          信頼性グレード・ノイズフロア未満の「参考値」、解析データの JSON エクスポート。research.md の閾値は変更なし
+ *   v1.2.0（2026-11-18）敵対的な入力条件への堅牢化（ROUND2.md）：実時間の窓（30/60fps・可変間隔）、遅いドローでのアンカー到達
+ *          （ドローの速さに対する比・頑健な最小距離・位置による補正）、途中から始まる動画（アンカー到達が映っていなければ確信度を
+ *          下げ、M3・M4・M5・M11 の「目安内」を参考値に）、弓腕が画面外（弓手首なしでもフェーズ検出・M2・M7・M10 は測定できず）、
+ *          逆光（可視度のゲートの適応）、リリース後の時点をサブフレームのリリース時刻から数える。research.md の閾値は変更なし
  */
 var ArcheryLogic = (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.2.0';
 
   /* ---------- ランドマーク番号（MediaPipe Pose 33 点） ---------- */
   var SIDE = {
@@ -644,8 +687,35 @@ var ArcheryLogic = (function () {
 
   /* ---------- 設定（research.md の閾値以外は実装上の運用値） ---------- */
   var CFG = {
-    minVis: 0.3,          // これ未満の可視度のランドマークは欠損扱い
-    maxGapSec: 0.35,      // これ以下の欠損は線形補間
+    minVis: 0.3,          // これ未満の可視度のランドマークは欠損扱い（主要点以外）
+    // ---- v1.1 前処理 ----
+    keyVis: 0.5,          // 主要点（肩・肘・手首・腰・耳）はこれ未満の可視度を欠損扱い（IMPROVE.md §1）
+    keyPoints: [7, 8, 11, 12, 13, 14, 15, 16, 23, 24],
+    maxGapSec: 0.25,      // 欠損（欠けたフレームの長さ＝欠損フレーム数×フレーム間隔）がこれ以下なら線形補間。
+                          // 15fps なら 3 フレーム（0.2 秒）まで。これより長い欠損は補間せず、そのフレームを無効にする
+    // 適応平滑化（One Euro フィルタ相当）。カットオフ fc = smMinCutoff + smBeta × max(0, 速度 − デッドゾーン)
+    //   速度は体軸系（肩幅 W／秒）での両手首の速さ（3 フレーム平均の中心差分）。体軸系なのでカメラの揺れに左右されない。
+    //   ・静止〜低速（エイミング。理想形の引き手の動きは 0.01 W/秒以下）：fc ≈ 1 Hz で強く平滑化
+    //     （15fps で 1 フレームあたりのノイズを約 1/3 に下げる。前後 2 方向の平均のため位相の遅れはない）
+    //   ・リリース（引き手首 2〜4 W/秒）：fc が 10 Hz 以上に上がり、ほぼ平滑化しない → 段差・速度ピークを保存
+    //   ・デッドゾーン：検出ノイズだけで生じる見かけの速さではカットオフを上げない。
+    //     max(smSpeedDead, smDeadK × 手首のジッタ σ ／フレーム間隔)。σ はクリップ全体の 4 階差分の中央値から推定するので、
+    //     ノイズの多い動画ほどデッドゾーンが広がり、静止区間の平滑化が弱まらない（3 フレーム平均の中心差分のノイズは
+    //     1 成分あたり σ／(3·Δt)。2 成分の大きさ・両手首の最大・保持窓内の最大をとると上側 1% 点がおよそ 1.2σ／Δt）
+    //   カットオフは全ランドマーク共通（フレームごとに 1 つ）。点ごとに変えると、手持ちカメラの揺れ（全点に共通の動き）が
+    //   点ごとに違う量だけ残り、体軸基準の相対値に漏れ込むため。
+    smMinCutoff: 1.0,     // Hz
+    smBeta: 15,           // Hz／(W/秒)。1 W/秒の動きで fc ≈ 13 Hz。6 では、リリース後に引き手が戻って止まる動きの終点で
+                          //   順方向フィルタの遅れが 0.01 W 残り、リリースの速度ピークも約 18% 減った（15 で約 8%）
+    smSpeedDead: 0.2,     // W/秒（デッドゾーンの下限）
+    smDeadK: 1.2,         // デッドゾーン ＝ この係数 × 手首のジッタ σ ／フレーム間隔（上記）
+    smHoldSec: 0.15,      // 速さの保持（平坦部）：動きの前後この時間はカットオフを下げない。動き→静止の境目（膝）で
+    smHoldTau: 0.1,       //   順方向フィルタの遅れが残って値が偏るのを防ぐ。その外側はこの時定数で指数減衰
+                          //   （例：リリース後に引き手が戻って止まる動きで、止まった直後の位置が 1 W/秒×τ 程度ずれない）
+    smDetrend: true,      // エイミング区間だけ 1 次トレンドを除いてから平滑化して戻す（エクスパンション・クリープなど一定方向の
+                          //   動きを区間の端で目減りさせない）。フォロースルーなど直線から大きく外れる区間では、直線を引くと
+                          //   静止部分に傾きが入り、前後のカットオフの違いで偏りが残るため行わない
+    smMaxPasses: 4,       // 平滑化の区切り（アンカー・リリース）とフェーズ検出の結果が一致するまで繰り返す最大回数
     scaleWinSec: 0.3,     // 肩幅 W の移動中央値の窓（片側）
     shoulderCm: 40,       // 表示用：肩幅 40cm 換算（research.md §3 M1 の換算と同じ）
     // フェーズ検出
@@ -654,12 +724,20 @@ var ArcheryLogic = (function () {
     nearMargin: 0.3,      // フルドロー候補：最小距離＋この値以内
     spanFrac: 0.8,        // フルドロー候補：両手首間距離が最大値のこの割合以上
     minRunSec: 0.25,      // フルドロー候補区間の最短長
-    anchorNear: 0.08,     // アンカー到達：区間内の最小距離＋この値以内
+    bridgeSec: 1.0,       // フルドロー区間の途中で関節を検出できないフレーム（未知）が続いても、この長さまでは区間を切らない
+                          //   （欠損でエイミングが 2 つに割れ、後半だけを射として扱う誤りを防ぐ。区間を終えるのは「離れた」と分かったフレームだけ）
+    anchorNear: 0.08,     // アンカー到達：区間内の最小距離（v1.2：anchorRefQ 分位点）＋この値以内
+    anchorPosTol: 0.02,   // v1.2：アンカー到達の位置による補正の最小の許容幅（W、約 0.8cm）
+    anchorRefQ: 0.2,      // v1.2：上の「最小距離」に使う分位点（区間の大半を占めるエイミングの距離に合わせ、ドロー途中の一瞬の接近に引きずられない）
     anchorSpeed: 0.15,    // アンカー到達：引き手首の速度（W/秒、0.33 秒平滑）がこの値未満になり
     anchorHoldSpeed: 0.4, //   その後 anchorHoldSec の間、この値未満で安定していること
     anchorHoldSec: 0.3,
+    hystNear: 0.1,        // フルドロー区間のヒステリシス：入るときは上の条件、続くあいだは距離 +0.1W・手首間 −0.1W まで許す
+    hystSpan: 0.1,
     releaseSpeed: 2.0,    // リリース：引き手首の速度（W/秒）がこの値を超える
     releaseAway: 0.08,    // リリース直後も頭部基準点から離れていること（W）
+    releaseHoldSec: 0.2,  // 最小持続時間：離れた状態がこの時間続くこと（単発ノイズでリリースと判定しない）
+    releasePeakSec: 0.3,  // リリースの速度ピークを探す範囲（動き始めからの秒）
     releaseFwdMax: 0.1,   // リリース時に的の方向へ大きく動くものは除外（W/フレーム）
     releaseOnset: 0.6,    // リリースの動き始め：この速度（W/秒）以上の直前フレームまで遡る
     fallbackAway: 0.15,   // 速度で検出できない場合：保持中の距離＋この値で離れ始め
@@ -669,7 +747,9 @@ var ArcheryLogic = (function () {
     setupRiseMin: 0.5,    // セットアップとみなす弓手首の上昇量（W）
     // 指標
     aimEdgeSec: 0.2,      // エイミング開始・終了の平均をとる長さ
-    aimSmoothSec: 0.5,    // アンカー安定性の移動平均の長さ（検出ノイズ対策。1 Hz 以上の細かい揺れは小さめに出る）
+    aimSmoothSec: 0,      // アンカー安定性（M3）の範囲をとる前の移動平均の長さ。v1.0 は 0.5 秒（検出ノイズ対策）だったが、
+                          //   v1.1 では適応平滑化がジッタを抑えるため 0（research.md の定義どおり平滑化後の系列の最大−最小）。
+                          //   0.5 秒のままだと平滑化と二重にかかり、1.2 Hz・幅 0.12 W のアンカーの揺れが 0.066 W まで縮んでいた
     minAimFrames: 4,      // エイミング系の指標に必要な最小フレーム数
     pluckSec: 0.3,        // M6：リリース直後 0.3 秒
     followSec: 0.5,       // M7・M8：リリース 0.5 秒後
@@ -680,8 +760,54 @@ var ArcheryLogic = (function () {
     earMinSep: 0.2,       // M12：両耳の横方向の間隔がこれ未満なら角度が不安定（W）
     // カメラ揺れ
     shakeWinSec: 0.5,     // 移動平均の窓（全幅）
-    shakeThreshold: 0.02  // research.md §5
+    shakeThreshold: 0.02, // research.md §5
+    // ---- v1.1 フェーズ検出の確信度（0〜1。3 つの材料の幾何平均） ----
+    confSpanTol: 0.2,     // アンカー区間の両手首間距離のばらつき（10〜90% 点の幅、W）がこの値で確信度 0
+    confSnrLo: 2,         // リリース速度ピーク ÷ エイミング中の速度（90% 点）が 2 以下で 0、8 以上で 1
+    confSnrHi: 8,
+    confValidLo: 0.6,     // 有効フレーム率（補間フレームは 0.5 と数える）が 60% 以下で 0、95% 以上で 1
+    confValidHi: 0.95,
+    confGapRelSec: 0.3,   // リリースの瞬間が欠損（未検出・補間）に重なるとき、その欠損の長さがこの値で release を 0 にする（線形）
+    confGapAnchorSec: 1.0,//   アンカー到達の直前が欠損のときは、この長さで anchor を 0 にする（アンカー後は静止しているので影響が小さい）
+    lowConfidence: 0.5,   // これ未満なら「フェーズ検出の確信度が低いため参考値です」
+    // ---- v1.1 指標ごとの測定ノイズと信頼性 ----
+    noiseGateK: 2,        // 閾値からの超過量がノイズの 2 倍未満なら指摘にせず「参考値」（IMPROVE.md §3）
+    noiseMinSamples: 6,   // ノイズ推定に必要な残差の最小数
+    relHigh: 0.15,        // ノイズ ÷ 指標のスケール（閾値の幅）がこれ以下で信頼性「高」
+    relMid: 0.35,         //   これ以下で「中」、超えると「低」
+    relInterpMax: 0.25,   // 指標に使ったフレームのうち補間・無効の割合がこれを超えると 1 段下げる
+    // ---- v1.2 入力条件への堅牢化（ROUND2.md） ----
+    baseSec: 1 / 15,      // 短い窓の基準時間（秒）。v1.1 までフレーム数で書いていた窓（速度の差分・移動平均・区間の途切れ・
+                          //   指標の平均をとるフレーム）を、15fps のときと同じ実時間に換算する。15fps の入力では v1.1 と同じ窓、
+                          //   30/60fps・可変間隔の入力でも実時間で等価な窓になる（60fps で 1 フレーム差の速度を使うと、検出ノイズで
+                          //   速度が 4 倍に見え、リリースの速度ピークがノイズの山に吸い寄せられていた）
+    anchorSpeedFrac: 0.3, // アンカー到達の速度条件は min(anchorSpeed, max(anchorSpeedFloor, この比 × そのドローの速度のピーク))。
+                          //   遅いドロー（5 秒）では引き手の速さが最初から 0.15 W/秒前後しかなく、ドローの途中をアンカー到達と
+                          //   判定していた（1.4 秒早い）。ドロー自体の速さに対する比にすると、速さによらず「動きが収まった」時点になる。
+                          //   0.3 は、標準的な速さのドロー（1.7 秒、ピーク約 0.55 W/秒）で v1.1 と同じ 0.15 W/秒になる値（標準のドローでは
+                          //   条件を厳しくしない。0.2 では検出ノイズのある動画でアンカー到達が最大 0.47 秒遅れた）
+    anchorSpeedFloor: 0.03, // 上の速度条件の下限（W/秒）。平滑化後の検出ノイズによる見かけの速さ（σ=0.005 で 0.02 程度）より上
+    anchorNoiseK: 2,      // 上の速度条件は、保持中（引き手首が顔の最も近い位置付近に来てから）の速さの 25% 点のこの倍より下げない。
+                          //   安定の確認の速さ（anchorHoldSpeed）も同じ比（速度条件 ÷ anchorSpeed）で下げる
+    anchorSeenDisp: 0.1,  // クリップの最初の有効フレームからアンカー到達までに、引き手首が顔に対してこれ以上（W）動いていれば
+                          //   「アンカー到達が映っている」。動いていなければ、クリップがフルドローの途中から始まったとみなす
+    confAnchorCut: 0.5,   // アンカー到達が映っていない場合、確信度の anchor にこの係数を掛ける
+    nearUnknownSpan: 0.12,// 弓手首が見えない（画面外・隠れ）フレームでも、引き手首〜顔の距離が最小値＋この値以内（W）なら
+                          //   フルドロー区間に入れる（両手首の間隔は判定できないので、顔に付いていることだけで判定する）
+    visAdaptMargin: 0.1,  // 逆光など全体に可視度が低い動画：主要点の可視度の中央値が keyVis＋この値未満なら、主要点のゲートを
+    visAdaptDrop: 0.15,   //   max(minVis, min(keyVis, 中央値 − visAdaptDrop)) に下げる（0.5 固定のままでは主要点の約半分が欠損になり、
+                          //   どの射も解析できなかった）。下げたゲートで採用した点は「可視度の低い点」として扱い、確信度・信頼性を下げる
+    lowVisWeight: 0.75,   // 確信度 valid：可視度の低い点を含むフレームはこの重みで数える（補間フレームは従来どおり 0.5）
+    armMissingFrac: 0.4,  // 片方の手首が全フレームのこの割合以上で欠損し、フェーズを検出できなかった場合は専用の案内を出す
+    followTimeErrFrames: 0.25 // M7・M8 の「リリース 0.5 秒後」の時点の不確かさのうち、リリース時刻の推定誤差（フレーム単位。v1.1 の
+                          //   フェーズ精度テストでサブフレームのリリース時刻の誤差は ±0.25 フレーム以内）
   };
+  var KEY_PT = (function () {
+    var m = [];
+    for (var i = 0; i < 33; i++) m.push(false);
+    CFG.keyPoints.forEach(function (k) { m[k] = true; });
+    return m;
+  })();
 
   /* ---------- 小さな数値ユーティリティ ---------- */
   function isNum(x) { return typeof x === 'number' && isFinite(x); }
@@ -713,12 +839,51 @@ var ArcheryLogic = (function () {
     var m = median(d);
     return isNum(m) && m > 0 ? m : 1 / 15;
   }
+  /* v1.2：実時間の窓（フレームレート・可変間隔に依存しない）。
+   * backIdx … k より前で、時刻差が sec（の 0.9 倍）以上になる最初のフレーム（なければ 0。k=0 なら −1）
+   * fwdIdx  … k より後で、時刻差が sec（の 0.9 倍）以上になる最初のフレーム（なければ n−1。k=n−1 なら n）
+   *   15fps で sec=1/15 なら k−1・k+1（v1.1 の 1 フレーム差と同じ）、60fps なら k−4・k+4
+   * within  … t[k]+lo 〜 t[k]+hi に入るフレーム番号の配列（端は 1ms の余裕） */
+  var T_EPS = 1e-3;
+  function backIdx(t, k, sec) {
+    if (k <= 0) return -1;
+    var j = k - 1;
+    while (j > 0 && t[k] - t[j] < 0.9 * sec) j--;
+    return j;
+  }
+  function fwdIdx(t, k, sec) {
+    var n = t.length;
+    if (k >= n - 1) return n;
+    var j = k + 1;
+    while (j < n - 1 && t[j] - t[k] < 0.9 * sec) j++;
+    return j;
+  }
+  function within(t, k, lo, hi) {
+    var out = [], n = t.length, j;
+    if (k < 0 || k >= n) return out;
+    for (j = k; j >= 0 && t[j] >= t[k] + lo - T_EPS; j--) if (t[j] <= t[k] + hi + T_EPS) out.unshift(j);
+    for (j = k + 1; j < n && t[j] <= t[k] + hi + T_EPS; j++) if (t[j] >= t[k] + lo - T_EPS) out.push(j);
+    return out;
+  }
 
-  /* ---------- 1. 入力の整形（縦横比補正・欠損補間） ---------- */
+  /* ---------- 1. 入力の整形（縦横比補正・visibility ゲーティング） ---------- */
   function prepare(frames, opts) {
     var aspect = opts && opts.width > 0 && opts.height > 0 ? opts.width / opts.height : 1;
     var list = (frames || []).filter(function (f) { return f && isNum(f.t); }).slice().sort(function (a, b) { return a.t - b.t; });
-    var t = [], P = [];
+    // v1.2：逆光など、動画全体で可視度が低い場合は主要点のゲートを下げる（CFG.visAdapt*）。
+    //   可視度の中央値は「座標のある主要点」全体から求める（一部の点が画面外でも、全体の傾向は変わらない）
+    var kv = [];
+    list.forEach(function (f) {
+      if (!f.lm || f.lm.length < 33) return;
+      CFG.keyPoints.forEach(function (k) { var q = f.lm[k]; if (q && isNum(q.x) && isNum(q.y)) kv.push(isNum(q.visibility) ? q.visibility : 1); });
+    });
+    var visMed = kv.length ? median(kv) : 1;
+    var keyGate = CFG.keyVis, adapted = false;
+    if (visMed < CFG.keyVis + CFG.visAdaptMargin) {
+      keyGate = Math.max(CFG.minVis, Math.min(CFG.keyVis, visMed - CFG.visAdaptDrop));
+      adapted = keyGate < CFG.keyVis;
+    }
+    var t = [], P = [], gated = 0, lowVisPts = 0;
     list.forEach(function (f) {
       t.push(f.t);
       if (!f.lm || f.lm.length < 33) { P.push(null); return; }
@@ -726,28 +891,35 @@ var ArcheryLogic = (function () {
       for (var i = 0; i < 33; i++) {
         var q = f.lm[i];
         var vis = q && isNum(q.visibility) ? q.visibility : 1;
-        if (!q || !isNum(q.x) || !isNum(q.y) || vis < CFG.minVis) { pts.push(null); continue; }
-        pts.push({ x: q.x * aspect, y: q.y, v: vis });
+        if (!q || !isNum(q.x) || !isNum(q.y)) { pts.push(null); continue; }
+        // 主要点（肩・肘・手首・腰・耳）は visibility < 0.5 を欠損として扱う（隠れた点の推測値を指標に使わない）。
+        // 全体に可視度が低い動画ではゲートを keyGate まで下げ、0.5 未満で採用した点に lowVis の印を付ける
+        if (vis < (KEY_PT[i] ? keyGate : CFG.minVis)) { if (KEY_PT[i] && vis >= CFG.minVis) gated++; pts.push(null); continue; }
+        var lv = KEY_PT[i] && vis < CFG.keyVis;
+        if (lv) lowVisPts++;
+        pts.push(lv ? { x: q.x * aspect, y: q.y, v: vis, lowVis: true } : { x: q.x * aspect, y: q.y, v: vis });
       }
       P.push(pts);
     });
-    return { t: t, P: P, aspect: aspect };
+    return { t: t, P: P, aspect: aspect, gated: gated, vis: { median: visMed, keyGate: keyGate, adapted: adapted, lowVisPoints: lowVisPts } };
   }
 
+  /* ---------- 1b. 欠損補間（短い欠損だけ線形補間。長い欠損は欠損のまま残し、buildBody でフレームを無効にする） ---------- */
   function fillGaps(t, P) {
-    var n = t.length;
+    var n = t.length, dt = frameDt(t);
     var out = P.map(function (pts) { return pts ? pts.slice() : null; });
     for (var k = 0; k < 33; k++) {
       var last = -1;
       for (var i = 0; i < n; i++) {
         var q = out[i] && out[i][k];
         if (!q) continue;
-        if (last >= 0 && i - last > 1 && t[i] - t[last] <= CFG.maxGapSec + 1e-9) {
+        // 欠損の長さ＝前後の検出フレームの間隔 − 1 フレーム（欠けたフレーム数 × フレーム間隔）
+        if (last >= 0 && i - last > 1 && t[i] - t[last] - dt <= CFG.maxGapSec + 1e-9) {
           var a = out[last][k];
           for (var j = last + 1; j < i; j++) {
             var r = (t[j] - t[last]) / (t[i] - t[last]);
             if (!out[j]) { out[j] = []; for (var z = 0; z < 33; z++) out[j].push(null); }
-            out[j][k] = { x: a.x + (q.x - a.x) * r, y: a.y + (q.y - a.y) * r, v: Math.min(a.v, q.v), interp: true };
+            out[j][k] = { x: a.x + (q.x - a.x) * r, y: a.y + (q.y - a.y) * r, v: Math.min(a.v, q.v), interp: true, lowVis: !!(a.lowVis || q.lowVis) };
           }
         }
         last = i;
@@ -782,7 +954,26 @@ var ArcheryLogic = (function () {
         n++;
       }
     }
-    if (!n) return null;
+    var fallback = false;
+    if (!n) {
+      // v1.2：フルドローで弓手首が一度も見えない（画面外・隠れ）場合の代替判定。
+      //   片方の手首だけが顔の近くにあり、もう一方が欠けているフレームで、顔に近い手首を引き手とする。
+      //   的の方向は肩の並び（撮影方向は胸の正面なので、弓側の肩が的の側に見える）で決める
+      for (i = 0; i < P.length; i++) {
+        p = P[i];
+        if (!p || !p[11] || !p[12] || (!!p[15] === !!p[16])) continue;
+        W = dist(p[11], p[12]); H = headRefImg(p);
+        if (!(W > 1e-6) || !H) continue;
+        var dIsR = !!p[16], wr = dIsR ? p[16] : p[15];
+        if (dist(wr, H) / W >= CFG.nearMax) continue;
+        if (dIsR) votesR++; else votesL++;
+        var sb = dIsR ? p[11] : p[12], sd = dIsR ? p[12] : p[11];
+        dirVotes += sb.x > sd.x ? 1 : -1;
+        n++;
+      }
+      if (!n) return null;
+      fallback = true;
+    }
     var autoHand = votesR >= votesL ? 'right' : 'left';
     var manual = handedness === 'right' || handedness === 'left';
     return {
@@ -791,7 +982,8 @@ var ArcheryLogic = (function () {
       source: manual ? 'manual' : 'auto',
       agreement: Math.max(votesR, votesL) / n,
       dir: dirVotes >= 0 ? 1 : -1,
-      votes: n
+      votes: n,
+      fallback: fallback
     };
   }
 
@@ -809,7 +1001,7 @@ var ArcheryLogic = (function () {
       else if (p[R.B.h] && p[R.D.h]) flip = (p[R.B.h].x - p[R.D.h].x) * sides.dir < 0;
       flips.push(flip);
       var src = flip ? p.map(function (_, k) { return p[SWAP[k]]; }) : p;
-      return src.map(function (q) { return q ? { x: q.x * sides.dir, y: q.y, v: q.v } : null; });
+      return src.map(function (q) { return q ? { x: q.x * sides.dir, y: q.y, v: q.v, interp: !!q.interp, lowVis: !!q.lowVis } : null; });
     });
     return { Q: Q, flips: flips };
   }
@@ -837,7 +1029,8 @@ var ArcheryLogic = (function () {
   }
   function med3(a, b, c) { return Math.max(Math.min(a, b), Math.min(Math.max(a, b), c)); }
 
-  function buildBody(t, Q, R) {
+  /* opts.raw: true なら median3 をかけない（ノイズ推定・平滑化のスケジュール用の生の体軸系列） */
+  function buildBody(t, Q, R, opts) {
     var n = t.length, dt = frameDt(t);
     var hipAng = [], legDir = [], legLen = [], shW = [];
     for (var i = 0; i < n; i++) {
@@ -861,12 +1054,19 @@ var ArcheryLogic = (function () {
     var hipMed = median(hipAng), legMed = median(legDir);
     var nHip = nums(hipAng).length, nLeg = nums(legDir).length;
     var useLeg = nHip > 0 && nLeg / nHip >= 0.6;
+    // 水平の基準（腰ラインの中央値）の推定誤差（ラジアン）。クリップ全体で一定のずれなので、フレームごとのジッタからは
+    // 見えないが、M1・M9・M10 のように基準の向きに依存する指標には同じだけ効く（測定ノイズの推定に加える）。
+    // 基準の実効的なずれは hipMed − legMed（脚軸で追従する場合）なので、その差の系列のジッタ σ から中央値の標準誤差 1.2533·σ/√N
+    var refDiff = hipAng.map(function (h, k) { return useLeg ? h - legDir[k] : h; });
+    var refRes = d4Push(t, refDiff, 0, n - 1, []);
+    var refSigma = refRes.length >= CFG.noiseMinSamples ? 1.2533 * (median(refRes) / 0.6745 / D4_SCALE) / Math.sqrt(Math.max(1, nums(refDiff).length)) : NaN;
     var roll = [];
     for (i = 0; i < n; i++) {
       var r = NaN;
       if (useLeg && isNum(legDir[i])) r = hipMed + (legDir[i] - legMed);
       else {
-        var win = nums(hipAng.slice(Math.max(0, i - 2), i + 3));
+        // ±2 フレーム（15fps 換算の実時間 ±2·baseSec）の腰ラインの角度の中央値
+        var win = nums(within(t, i, -2 * CFG.baseSec, 2 * CFG.baseSec).map(function (k) { return hipAng[k]; }));
         if (win.length) r = median(win);
         else if (isNum(hipMed)) r = hipMed;
       }
@@ -884,13 +1084,27 @@ var ArcheryLogic = (function () {
     }
 
     var keys = { sB: R.B.s, sD: R.D.s, eB: R.B.e, eD: R.D.e, wB: R.B.w, wD: R.D.w, hB: R.B.h, hD: R.D.h, earB: R.B.ear, earD: R.D.ear };
+    // フレームの有効判定に使う主要点（指標とフェーズ検出に必須の点）。耳は M12 だけで使い、
+    // 規定の撮影方向では奥側の耳が隠れるのが普通なので、有効判定には含めない。
+    // v1.2：弓手首（B.w）も必須から外した。弓腕が画面外に出たフレームでも、引き手・顔・肩で測るフェーズ検出と
+    //   指標（M1・M3〜M6・M8・M9・M11）は測れる。弓手首を使う指標（M2・M7・M10）は、そのフレームでは値が出ず（NaN）、
+    //   足りなければ「測定できず」になる。弓手首が欠けたフレームは bowMissing とし、フェーズ検出の確信度（有効フレーム率・
+    //   アンカー到達／リリースの瞬間の欠損）では v1.1 と同じく無効フレームとして数える（IMPROVE.md §1「長い欠損はそのフレームを
+    //   無効化し、valid 判定に反映」）。つまり「解析には使うが、確信度の裏付けにはしない」
+    var need = [R.B.s, R.D.s, R.D.e, R.D.w, R.B.h, R.D.h];
     var S = { H: [] };
     Object.keys(keys).forEach(function (k) { S[k] = []; });
-    var valid = [];
+    var valid = [], interp = [], bowMissing = [], lowVis = [];
     for (i = 0; i < n; i++) {
       var q = Q[i];
-      var ok = !!(q && q[R.B.s] && q[R.D.s] && isNum(W[i]) && W[i] > 1e-6 && isNum(roll[i]));
+      var ok = !!(q && isNum(W[i]) && W[i] > 1e-6 && isNum(roll[i]));
+      var ip = false, lv = false;
+      for (var z = 0; ok && z < need.length; z++) { if (!q[need[z]]) ok = false; else { if (q[need[z]].interp) ip = true; if (q[need[z]].lowVis) lv = true; } }
+      if (ok && q[R.B.w]) { if (q[R.B.w].interp) ip = true; if (q[R.B.w].lowVis) lv = true; }
       valid.push(ok);
+      interp.push(ok && ip);
+      bowMissing.push(ok && !q[R.B.w]);
+      lowVis.push(ok && lv);
       if (!ok) { Object.keys(S).forEach(function (k) { S[k].push(null); }); continue; }
       var O = mid(q[R.B.s], q[R.D.s]), c = Math.cos(roll[i]), s = Math.sin(roll[i]), w = W[i];
       var tf = function (pt) {
@@ -901,8 +1115,212 @@ var ArcheryLogic = (function () {
       Object.keys(keys).forEach(function (k) { S[k].push(tf(q[keys[k]])); });
       S.H.push(tf(headRefImg(q)));
     }
-    Object.keys(S).forEach(function (k) { S[k] = median3(S[k]); });
-    return { n: n, dt: dt, W: W, roll: roll, S: S, valid: valid, rollSource: useLeg ? 'legs' : 'hips' };
+    if (!(opts && opts.raw)) Object.keys(S).forEach(function (k) { S[k] = median3(S[k]); });
+    return { n: n, t: t, dt: dt, W: W, roll: roll, S: S, valid: valid, interp: interp, bowMissing: bowMissing, lowVis: lowVis, rollSource: useLeg ? 'legs' : 'hips', refSigma: refSigma };
+  }
+
+  /* ---------- 3b. 適応平滑化（One Euro フィルタ相当、前後 2 方向） ----------
+   * One Euro フィルタ（Casiez et al., CHI 2012）は「遅いときは強く、速いときは弱く」平滑化する 1 次ローパス。
+   * ここでは解析がオフラインなので、時間の順方向と逆方向に 1 回ずつかけて合成し、位相の遅れ（ラグ）を打ち消す。
+   *   ・カットオフはフレームごとに全ランドマーク共通で、生の体軸系列から求めた両手首の速さで決める（CFG の説明を参照）。
+   *   ・合成の重みは各方向の出力の分散（白色ノイズに対する）の逆数。区切りの直後で始まったばかりの方向は
+   *     ほとんど平滑化されていないため、反対方向の出力を主に使う。
+   *   ・区切り（breaks）：アンカー到達とリリースの動き始めでは平滑化を切る。動き→静止の境目（膝）をまたいで
+   *     平滑化すると、エイミングの最初と最後にドロー・リリースの動きが混ざって指標が偏るため。
+   * カットオフ列・重みは入力データの値に依存しない（線形フィルタ）ので、ノイズの伝わり方を正確に計算できる（noiseGain）。 */
+  function alphaOf(fc, te) {
+    var tau = 1 / (2 * Math.PI * fc);
+    return 1 / (1 + tau / Math.max(te, 1e-6));
+  }
+
+  /* 体軸系の手首座標の 1 フレームあたりのジッタ σ（W）。4 階差分（1,−4,6,−4,1）の中央値から推定する。
+   * なめらかな動き（3 次までの多項式で近似できる動き）は 4 階差分にほとんど現れないため、動いている区間を含むクリップ全体から推定できる */
+  function wristJitter(Braw) {
+    var res = [], t = Braw.t;
+    ['wD', 'wB'].forEach(function (key) {
+      ['u', 'v'].forEach(function (c) {
+        d4Residuals(t, Braw, function (S, i) { return S[key][i] ? S[key][i][c] : NaN; }, 0, Braw.n - 1, res);
+      });
+    });
+    if (res.length < CFG.noiseMinSamples) return 0;
+    return median(res) / 0.6745 / D4_SCALE;
+  }
+
+  /* 3 点の 2 次残差：中央の値 − 前後を結ぶ直線（時刻で内挿）の値。等間隔でなくても 1 次の動きは 0 になる */
+  function res2(a, b, c, ta, tb, tc) { return b - (a + (c - a) * (tb - ta) / (tc - ta)); }
+  /* 4 階の残差（2 次残差の 2 次残差）。等間隔なら係数 (1,−4,6,−4,1)/4 で、3 次までの多項式の動きは 0 になる。
+   * 白色ノイズ σ に対する標準偏差は σ·√70／4（D4_SCALE）。連続 5 フレームが有効（補間なし）の位置だけ使う。 */
+  var D4_SCALE = Math.sqrt(70) / 4;
+  /* 数値列 x（欠損は NaN）の [i0, i1] で 4 階の残差の絶対値を out に追加する */
+  function d4Push(t, x, i0, i1, out) {
+    var lo = Math.max(2, i0 + 2), hi = Math.min(t.length - 3, i1 - 2);
+    for (var i = lo; i <= hi; i++) {
+      if (!isNum(x[i - 2]) || !isNum(x[i - 1]) || !isNum(x[i]) || !isNum(x[i + 1]) || !isNum(x[i + 2])) continue;
+      var r1 = res2(x[i - 2], x[i - 1], x[i], t[i - 2], t[i - 1], t[i]);
+      var r2 = res2(x[i - 1], x[i], x[i + 1], t[i - 1], t[i], t[i + 1]);
+      var r3 = res2(x[i], x[i + 1], x[i + 2], t[i], t[i + 1], t[i + 2]);
+      out.push(Math.abs(res2(r1, r2, r3, t[i - 1], t[i], t[i + 1])));
+    }
+    return out;
+  }
+  /* 体軸系列の信号 fn について、有効（補間なし）フレームだけで 4 階の残差を求める */
+  function d4Residuals(t, Braw, fn, i0, i1, out) {
+    var x = [];
+    for (var j = 0; j < t.length; j++) x.push(j >= i0 - 2 && j <= i1 + 2 && Braw.valid[j] && !Braw.interp[j] ? fn(Braw.S, j) : NaN);
+    return d4Push(t, x, i0, i1, out);
+  }
+
+  /* breaks：区切りのフレーム番号の配列（b−1 と b のあいだで平滑化を切る＝ b から新しい区間）
+   * trendFrom：この番号のフレームを含む区間（エイミング＝アンカー到達から）だけ 1 次トレンドを除いて平滑化する
+   * motionFrom：この番号のフレーム（リリースの動き始めの次）では、区切りをまたぐ直前フレームからの移動も速さに含める
+   *   （リリースの最初の大きな一歩は区切りの上にあるため、区間の中だけで速さを測るとフォロースルーの出だしを強く平滑化してしまう。
+   *    区切りの手前（エイミングの最後）には含めないので、エイミングの平滑化は弱まらない） */
+  function smoothSchedule(t, Braw, breaks, trendFrom, motionFrom) {
+    var n = t.length, S = Braw.S, pts = ['wD', 'wB'], sm = {}, seg = [], g = 0, i, j;
+    // v1.2：速さは ±bs の移動平均（約 cAvg フレーム）を ±bs 離れて差分するので、検出ノイズによる見かけの速さは
+    //   σ／bs／√(cAvg／3) に比例する（15fps では v1.1 と同じ 1.2σ／Δt）。フレーム間隔で割ると 60fps でデッドゾーンが
+    //   4 倍に広がり、リリースでもカットオフが上がらなくなる
+    var bs = Math.max(CFG.baseSec, frameDt(t)), cAvg = 2 * bs / frameDt(t) + 1;
+    var jit = wristJitter(Braw), dead = Math.max(CFG.smSpeedDead, CFG.smDeadK * jit / bs * Math.sqrt(3 / cAvg));
+    var brk = {};
+    (breaks || []).forEach(function (b) { if (b > 0 && b < n) brk[b] = true; });
+    for (i = 0; i < n; i++) { if (brk[i]) g++; seg.push(g); }
+    // 移動平均（検出ノイズで見かけの速さが出るのを抑える）。区切りはまたがない。
+    // v1.2：窓は実時間 ±bs（15fps なら v1.1 と同じ 3 フレーム、60fps なら 9 フレーム）。速さの差分も ±bs 離れたフレームで取る
+    pts.forEach(function (key) {
+      sm[key] = S[key].map(function (_, k) {
+        var su = 0, sv = 0, c = 0, w = within(t, k, -bs, bs);
+        w.forEach(function (j) { if (seg[j] === seg[k] && S[key][j]) { su += S[key][j].u; sv += S[key][j].v; c++; } });
+        return c >= 2 && c >= 0.6 * w.length ? { u: su / c, v: sv / c } : null;
+      });
+    });
+    var speed = [], fc = [], aF = [], aB = [], vF = [], vB = [], wF = [];
+    for (i = 0; i < n; i++) {
+      var lo = backIdx(t, i, bs), hi = fwdIdx(t, i, bs), s = 0;
+      if (lo < 0) lo = i; if (hi > n - 1) hi = i;
+      while (lo < i && seg[lo] !== seg[i]) lo++;
+      while (hi > i && seg[hi] !== seg[i]) hi--;
+      if (hi > lo) {
+        pts.forEach(function (key) {
+          var a = sm[key][lo], b = sm[key][hi];
+          if (a && b) s = Math.max(s, bdist(a, b) / (t[hi] - t[lo]));
+        });
+      }
+      if (i === motionFrom && i > 0) {
+        pts.forEach(function (key) {
+          var a = S[key][i - 1], b = S[key][i];
+          if (a && b) s = Math.max(s, bdist(a, b) / (t[i] - t[i - 1]));
+        });
+      }
+      speed.push(s);
+    }
+    // 速さの保持（前後どちら向きにも、平坦部 smHoldSec ＋ 時定数 smHoldTau の指数減衰で広げる）。区切りはまたがない
+    var hold = speed.slice(), reach = CFG.smHoldSec + 4 * CFG.smHoldTau;
+    function holdW(d) { return d <= CFG.smHoldSec ? 1 : Math.exp(-(d - CFG.smHoldSec) / CFG.smHoldTau); }
+    for (i = 0; i < n; i++) {
+      for (j = i - 1; j >= 0 && seg[j] === seg[i] && t[i] - t[j] <= reach; j--) hold[i] = Math.max(hold[i], speed[j] * holdW(t[i] - t[j]));
+      for (j = i + 1; j < n && seg[j] === seg[i] && t[j] - t[i] <= reach; j++) hold[i] = Math.max(hold[i], speed[j] * holdW(t[j] - t[i]));
+    }
+    for (i = 0; i < n; i++) fc.push(CFG.smMinCutoff + CFG.smBeta * Math.max(0, hold[i] - dead));
+    for (i = 0; i < n; i++) {
+      aF.push(i === 0 || seg[i - 1] !== seg[i] ? 1 : alphaOf(fc[i], t[i] - t[i - 1]));
+      vF.push(aF[i] * aF[i] + (aF[i] < 1 ? (1 - aF[i]) * (1 - aF[i]) * vF[i - 1] : 0));
+    }
+    for (i = n - 1; i >= 0; i--) {
+      aB[i] = i === n - 1 || seg[i + 1] !== seg[i] ? 1 : alphaOf(fc[i], t[i + 1] - t[i]);
+      vB[i] = aB[i] * aB[i] + (aB[i] < 1 ? (1 - aB[i]) * (1 - aB[i]) * vB[i + 1] : 0);
+    }
+    for (i = 0; i < n; i++) wF.push(vB[i] / (vF[i] + vB[i]));
+    var trendSeg = CFG.smDetrend && isNum(trendFrom) && trendFrom >= 0 && trendFrom < n ? seg[trendFrom] : -1;
+    return { speed: speed, fc: fc, aF: aF, aB: aB, wF: wF, seg: seg, t: t, breaks: Object.keys(brk).map(Number), trendSeg: trendSeg, jitter: jit, dead: dead };
+  }
+
+  /* トレンド除去の対象区間（sch.trendSeg）の 1 次トレンド（最小二乗直線）。ほかの区間は 0。欠損（NaN）は当てはめに使わない */
+  function segmentLines(x, sch) {
+    var n = x.length, out = new Array(n), i = 0;
+    while (i < n) {
+      var j = i;
+      while (j + 1 < n && sch.seg[j + 1] === sch.seg[i]) j++;
+      if (sch.seg[i] !== sch.trendSeg) { for (var z = i; z <= j; z++) out[z] = 0; i = j + 1; continue; }
+      var st = 0, sx = 0, stt = 0, stx = 0, c = 0, k;
+      for (k = i; k <= j; k++) if (isNum(x[k])) { var tk = sch.t[k] - sch.t[i]; st += tk; sx += x[k]; stt += tk * tk; stx += tk * x[k]; c++; }
+      var den = c * stt - st * st, b = c >= 3 && den > 1e-12 ? (c * stx - st * sx) / den : 0, a = c ? (sx - b * st) / c : 0;
+      for (k = i; k <= j; k++) out[k] = a + b * (sch.t[k] - sch.t[i]);
+      i = j + 1;
+    }
+    return out;
+  }
+
+  /* 数値列（欠損は NaN）に前後 2 方向の可変係数 1 次ローパスをかけて合成する。欠損をまたぐ場合はそこで状態を初期化する */
+  function smoothSeries(x0, sch) {
+    var n = x0.length, y = new Array(n), z = new Array(n), out = new Array(n), prev = NaN, i;
+    var line = sch.trendSeg >= 0 ? segmentLines(x0, sch) : null;
+    var x = line ? x0.map(function (v, k) { return isNum(v) ? v - line[k] : NaN; }) : x0;
+    for (i = 0; i < n; i++) {
+      if (!isNum(x[i])) { y[i] = NaN; prev = NaN; continue; }
+      y[i] = isNum(prev) ? sch.aF[i] * x[i] + (1 - sch.aF[i]) * prev : x[i];
+      prev = y[i];
+    }
+    prev = NaN;
+    for (i = n - 1; i >= 0; i--) {
+      if (!isNum(x[i])) { z[i] = NaN; prev = NaN; continue; }
+      z[i] = isNum(prev) ? sch.aB[i] * x[i] + (1 - sch.aB[i]) * prev : x[i];
+      prev = z[i];
+    }
+    for (i = 0; i < n; i++) out[i] = isNum(y[i]) ? sch.wF[i] * y[i] + (1 - sch.wF[i]) * z[i] + (line ? line[i] : 0) : NaN;
+    return out;
+  }
+
+  /* 画像空間のランドマーク（orient 後の Q）を平滑化する */
+  function smoothLandmarks(Q, sch) {
+    var n = Q.length;
+    var out = Q.map(function (p) { return p ? p.map(function (q) { return q ? { x: q.x, y: q.y, v: q.v, interp: q.interp, lowVis: q.lowVis } : null; }) : null; });
+    for (var k = 0; k < 33; k++) {
+      var xs = [], ys = [];
+      for (var i = 0; i < n; i++) {
+        var q = Q[i] && Q[i][k];
+        xs.push(q ? q.x : NaN); ys.push(q ? q.y : NaN);
+      }
+      var sx = smoothSeries(xs, sch), sy = smoothSeries(ys, sch);
+      for (i = 0; i < n; i++) if (out[i] && out[i][k]) { out[i][k].x = sx[i]; out[i][k].y = sy[i]; }
+    }
+    return out;
+  }
+
+  /* 平滑化後の値の重み付き和 Σ c_i·x̂_i が、入力の白色ノイズ（σ=1）から受けるノイズの標準偏差。
+   * 順方向・逆方向それぞれの転置演算を漸化式で計算する（O(n)）。 */
+  function noiseGain(sch, c) {
+    var n = c.length, s = new Array(n), q = new Array(n), acc = 0, tot = 0, j;
+    for (j = n - 1; j >= 0; j--) { acc = c[j] * sch.wF[j] + (j + 1 < n ? (1 - sch.aF[j + 1]) * acc : 0); s[j] = acc; }
+    acc = 0;
+    for (j = 0; j < n; j++) { acc = c[j] * (1 - sch.wF[j]) + (j > 0 ? (1 - sch.aB[j - 1]) * acc : 0); q[j] = acc; }
+    var f = [];
+    for (j = 0; j < n; j++) f.push(sch.aF[j] * s[j] + sch.aB[j] * q[j]);
+    if (sch.trendSeg >= 0) {
+      // トレンド除去つきの場合：g = Fᵀc + L(c − Fᵀc)（L はトレンド除去の対象区間の直線への射影。ほかの区間は 0）
+      var d = c.map(function (v, k) { return v - f[k]; });
+      var Ld = projectLines(d, sch);
+      for (j = 0; j < n; j++) f[j] += Ld[j];
+    }
+    for (j = 0; j < n; j++) tot += f[j] * f[j];
+    return Math.sqrt(tot);
+  }
+  /* ベクトル v を、トレンド除去の対象区間では span{1, t} へ直交射影する（ほかの区間は 0） */
+  function projectLines(v, sch) {
+    var n = v.length, out = new Array(n), i = 0;
+    while (i < n) {
+      var j = i;
+      while (j + 1 < n && sch.seg[j + 1] === sch.seg[i]) j++;
+      if (sch.seg[i] !== sch.trendSeg) { for (var z = i; z <= j; z++) out[z] = 0; i = j + 1; continue; }
+      var c = j - i + 1, mt = 0, k;
+      for (k = i; k <= j; k++) mt += sch.t[k];
+      mt /= c;
+      var sv = 0, stv = 0, stt = 0;
+      for (k = i; k <= j; k++) { var dk = sch.t[k] - mt; sv += v[k]; stv += dk * v[k]; stt += dk * dk; }
+      for (k = i; k <= j; k++) out[k] = sv / c + (stt > 1e-12 ? stv / stt * (sch.t[k] - mt) : 0);
+      i = j + 1;
+    }
+    return out;
   }
 
   /* ---------- 4. フェーズ検出（research.md §4） ---------- */
@@ -920,26 +1338,92 @@ var ArcheryLogic = (function () {
     return runs;
   }
 
+  /* ヒステリシス付きの区間検出：enter が真になったら区間に入り、stay が偽のフレームが maxGap を超えて続くまで区間を保つ。
+   * minSec より短い区間は捨てる（単発ノイズでフェーズが飛ばないように）。
+   * unknown[i] が真のフレーム（関節を検出できず判定できない）は、区間の中では「出た」とも「続いた」とも数えない。
+   * ただし未知のフレームが bridgeSec を超えて続いた場合は、そこで区間を終える */
+  /* v1.2：maxGap は「15fps で何フレームまでの途切れを許すか」。実時間（区間外のフレームの合計時間 > (maxGap + 0.5)·baseSec で
+   * 区間を終える）に換算するので、30/60fps・可変間隔でも同じ長さの途切れで区間が切れる（15fps では v1.1 と同じ判定） */
+  function findRunsHyst(enter, stay, t, maxGap, minSec, unknown, bridgeSec) {
+    var runs = [], s = -1, lastIn = -1, outN = 0, gapSec = (maxGap + 0.5) * CFG.baseSec;
+    function close() { if (t[lastIn] - t[s] >= minSec - 1e-9) runs.push({ s: s, e: lastIn }); s = -1; outN = 0; }
+    for (var i = 0; i < enter.length; i++) {
+      if (s >= 0 && unknown && unknown[i]) {
+        if (t[i] - t[lastIn] > bridgeSec + 1e-9) close();
+        continue;
+      }
+      if (s < 0 ? enter[i] : stay[i]) {
+        if (s < 0) s = i;
+        lastIn = i; outN = 0;
+      } else if (s >= 0) {
+        outN += i > 0 ? t[i] - t[i - 1] : CFG.baseSec;
+        if (outN > gapSec + 1e-9) {
+          close();
+          if (enter[i]) { s = i; lastIn = i; }
+        }
+      }
+    }
+    if (s >= 0) close();
+    return runs;
+  }
+
+  /* 体軸系での引き手首の速さ（W/秒）。v1.2：k の baseSec 前のフレーム j から k までの平均の速さ（15fps では v1.1 と同じ k−1→k）。
+   * 60fps で 1 フレーム差を使うと、検出ノイズによる見かけの速さが 4 倍になり、エイミング中の速さ（確信度の基準）や
+   * リリースの速度ピークがノイズに埋もれる。tm は区間の中点の時刻 */
+  function speedAt(t, S, k) {
+    if (k < 1 || k >= t.length || !S.wD[k]) return null;
+    var j = backIdx(t, k, CFG.baseSec);
+    if (j < 0 || !S.wD[j]) return null;
+    return { v: bdist(S.wD[k], S.wD[j]) / (t[k] - t[j]), tm: (t[k] + t[j]) / 2 };
+  }
+  function wristSpeed(t, S, k) { var q = speedAt(t, S, k); return q ? q.v : NaN; }
+
+  /* リリース時刻のサブフレーム推定：動き始めのフレーム r の後の速度ピークを放物線補間で求め、
+   * ピーク速度の半分を上向きに横切る時刻（前後の速さの線形補間）をリリースの瞬間とする */
+  function refineRelease(t, S, r) {
+    var n = t.length;
+    var kEnd = Math.min(n - 1, idxNear(t, t[r] + CFG.releasePeakSec));
+    var best = -1, bk = -1, k;
+    for (k = r + 1; k <= kEnd; k++) { var sp = wristSpeed(t, S, k); if (isNum(sp) && sp > best) { best = sp; bk = k; } }
+    if (bk < 0) return null;
+    var q0 = speedAt(t, S, bk), qm = speedAt(t, S, bk - 1), qp = bk + 1 < n ? speedAt(t, S, bk + 1) : null, delta = 0, vPeak = best;
+    if (qm && qp) {
+      var den = qm.v - 2 * best + qp.v;
+      if (den < 0) { delta = clamp(0.5 * (qm.v - qp.v) / den, -0.5, 0.5); vPeak = best - 0.25 * (qm.v - qp.v) * delta; }
+    }
+    var step = delta >= 0 ? (qp ? qp.tm - q0.tm : 0) : (qm ? q0.tm - qm.tm : 0);
+    var tPeak = q0.tm + delta * step;
+    var half = vPeak / 2, tOn = q0.tm;
+    for (k = bk; k >= 2 && t[k] > t[r] - 2.5 * CFG.baseSec; k--) {
+      var a = speedAt(t, S, k - 1), b = speedAt(t, S, k);
+      if (!a || !b) break;
+      if (a.v < half && b.v >= half) { tOn = a.tm + (half - a.v) / (b.v - a.v) * (b.tm - a.tm); break; }
+    }
+    return { t: tOn, peakT: tPeak, peakSpeed: vPeak, peakFrame: bk };
+  }
+
   function detectPhases(t, B) {
-    var S = B.S, n = t.length, dt = B.dt, i;
+    var S = B.S, n = t.length, i, bs = CFG.baseSec;
     var dDraw = [], span = [], hBow = [], speed = [];
     for (i = 0; i < n; i++) {
       dDraw.push(S.wD[i] && S.H[i] ? bdist(S.wD[i], S.H[i]) : NaN);
       span.push(S.wB[i] && S.wD[i] ? bdist(S.wB[i], S.wD[i]) : NaN);
       hBow.push(S.sB[i] && S.wB[i] ? S.sB[i].v - S.wB[i].v : NaN);
     }
-    // 顔に対する引き手首の位置を 5 フレーム移動平均し、±2 フレームの差分で速度を求める（検出ノイズ対策）
-    var relS = [];
+    // 顔に対する引き手首の位置を移動平均し、前後に離れたフレームの差分で速度を求める（検出ノイズ対策）。
+    // v1.2：窓は実時間 ±2·baseSec（15fps で v1.1 と同じ 5 フレーム・±2 フレーム。60fps では 17 フレーム・±8 フレーム）
+    var relS = [], rel = [];
     for (i = 0; i < n; i++) {
-      var su = 0, sv = 0, c = 0;
-      for (var j = Math.max(0, i - 2); j <= Math.min(n - 1, i + 2); j++) {
-        if (S.wD[j] && S.H[j]) { su += S.wD[j].u - S.H[j].u; sv += S.wD[j].v - S.H[j].v; c++; }
-      }
-      relS.push(c >= 3 ? { u: su / c, v: sv / c } : null);
+      rel.push(S.wD[i] && S.H[i] ? { u: S.wD[i].u - S.H[i].u, v: S.wD[i].v - S.H[i].v } : null);
     }
     for (i = 0; i < n; i++) {
-      var a = i - 2, b = i + 2, sp = NaN;
-      if (a >= 0 && b < n && relS[a] && relS[b]) sp = bdist(relS[b], relS[a]) / (t[b] - t[a]);
+      var su = 0, sv = 0, c = 0, w = within(t, i, -2 * bs, 2 * bs);
+      w.forEach(function (j) { if (rel[j]) { su += rel[j].u; sv += rel[j].v; c++; } });
+      relS.push(c >= 3 && c >= 0.6 * w.length ? { u: su / c, v: sv / c } : null);
+    }
+    for (i = 0; i < n; i++) {
+      var a = backIdx(t, i, 2 * bs), b = fwdIdx(t, i, 2 * bs), sp = NaN;
+      if (a >= 0 && b < n && t[i] - t[a] >= 1.8 * bs - T_EPS && t[b] - t[i] >= 1.8 * bs - T_EPS && relS[a] && relS[b]) sp = bdist(relS[b], relS[a]) / (t[b] - t[a]);
       speed.push(sp);
     }
     var sig = { dDraw: dDraw, span: span, hBow: hBow, speed: speed };
@@ -949,16 +1433,24 @@ var ArcheryLogic = (function () {
     // 両手首間距離の基準は「引き手が顔の近くにあるフレーム」に限って求める
     // （フォロースルーでは引き手が後ろへ流れて、フルドローより手首間が開くため）
     var spanRef = quantile(span.filter(function (x, k) { return dDraw[k] <= dLow; }), 0.95);
-    if (!(spanRef > CFG.spanMin)) return { ok: false, code: 'no-full-draw', sig: sig };
-    var spanHigh = Math.max(spanRef * CFG.spanFrac, CFG.spanMin);
-    var mask = dDraw.map(function (d, k) { return d <= dLow && span[k] >= spanHigh; });
-    var runs = findRuns(mask, t, 2, CFG.minRunSec);
+    // v1.2：顔の近くで弓手首が一度も見えない（弓腕が画面外）場合は、両手首の間隔を確かめられない（spanUnverified）。
+    //   その場合は「引き手首が顔の最も近い位置付近にある」ことだけで判定し、確信度を下げる
+    var spanKnown = isNum(spanRef);
+    if (spanKnown && !(spanRef > CFG.spanMin)) return { ok: false, code: 'no-full-draw', sig: sig };
+    var spanHigh = spanKnown ? Math.max(spanRef * CFG.spanFrac, CFG.spanMin) : Infinity;
+    var dTight = dMin + CFG.nearUnknownSpan;
+    // ヒステリシス：区間に入るのは厳しい条件、続けるのは緩い条件（境界付近のノイズで区間が細切れにならない）。
+    // 弓手首が見えないフレームは、引き手首〜顔の距離だけで判定する（v1.1 は判定不能として扱い、1 秒を超えると区間を切っていた）
+    var enter = dDraw.map(function (d, k) { return isNum(span[k]) ? d <= dLow && span[k] >= spanHigh : d <= dTight; });
+    var stay = dDraw.map(function (d, k) { return isNum(span[k]) ? d <= dLow + CFG.hystNear && span[k] >= spanHigh - CFG.hystSpan : d <= dTight + CFG.hystNear; });
+    var unknown = dDraw.map(function (d) { return !isNum(d); });
+    var runs = findRunsHyst(enter, stay, t, 2, CFG.minRunSec, unknown, CFG.bridgeSec);
     if (!runs.length) return { ok: false, code: 'no-full-draw', sig: sig };
 
     var searchStart = 0, lastCode = 'no-release', skipped = [];
     for (var r = 0; r < runs.length; r++) {
       var res = analyzeRun(runs[r], searchStart);
-      if (res.ok) { res.sig = sig; res.skipped = skipped; return res; }
+      if (res.ok) { res.sig = sig; res.skipped = skipped; res.spanUnverified = !spanKnown; return res; }
       lastCode = res.code;
       skipped.push({ code: res.code, t0: t[runs[r].s], t1: t[runs[r].e] });
       searchStart = runs[r].e + 1;
@@ -966,30 +1458,75 @@ var ArcheryLogic = (function () {
     return { ok: false, code: lastCode, sig: sig };
 
     function analyzeRun(run, ws0) {
-      var k, dRunMin = Infinity;
-      for (k = run.s; k <= run.e; k++) if (isNum(dDraw[k]) && dDraw[k] < dRunMin) dRunMin = dDraw[k];
-      var anchor = -1, holdN = Math.max(1, Math.round(CFG.anchorHoldSec / dt));
+      // 区間内の「最小距離」は、v1.2 で区間の距離の anchorRefQ 分位点（頑健な最小値）にした。ドローの途中で引き手首が
+      //   アンカー位置より顔に近い所を通る場合（遅いドロー・検出ノイズ）、本当の最小値はその一瞬の値になり、アンカー位置の
+      //   フレームが「最小値＋anchorNear 以内」を満たさず、アンカー到達が 1 秒以上遅れる・早まることがあった
+      var k, dRunMin = quantile(dDraw.slice(run.s, run.e + 1), CFG.anchorRefQ);
+      if (!isNum(dRunMin)) dRunMin = Infinity;
+      // v1.2：アンカー到達の速度条件は、そのドローの速さのピークに対する比で下げる。ピークは区間の 1 秒前から、引き手首が
+      //   初めて顔の最も近い位置付近（dRunMin＋anchorNear 以内）に来たフレームまでで測る（区間の終わりはリリースの動きを含むことがある）。
+      //   遅いドロー（5 秒）では、ドロー中の引き手の速さが固定の 0.15 W/秒を下回り、ドローの途中をアンカー到達としていた
+      var kNear = run.e;
+      for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear) { kNear = k; break; }
+      var pk = 0;
+      for (k = Math.max(ws0, idxNear(t, t[run.s] - 1.0)); k <= kNear; k++) if (isNum(speed[k]) && speed[k] > pk) pk = speed[k];
+      //   ただし検出ノイズによる見かけの速さ（保持中の速さの 25% 点 × anchorNoiseK）より下げない（下げると、ノイズの多い動画で
+      //   いつまでも条件を満たさず、アンカー到達が大きく遅れる）。安定の確認（その後 anchorHoldSec のあいだ速さが上がらない）も
+      //   同じ比で下げる（固定の 0.4 W/秒では、遅いドローの途中で一瞬速さが下がったフレームを拾っていた）
+      var hold = [];
+      for (k = kNear; k <= run.e; k++) if (isNum(speed[k])) hold.push(speed[k]);
+      var noiseSp = hold.length >= 3 ? quantile(hold, 0.25) : 0;
+      var aSpeed = Math.min(CFG.anchorSpeed, Math.max(CFG.anchorSpeedFloor, CFG.anchorSpeedFrac * pk, CFG.anchorNoiseK * noiseSp));
+      var hSpeed = Math.min(CFG.anchorHoldSpeed, CFG.anchorHoldSpeed * aSpeed / CFG.anchorSpeed);
+      var anchor = -1;
       for (k = run.s; k <= run.e && anchor < 0; k++) {
-        if (!(dDraw[k] <= dRunMin + CFG.anchorNear) || !(speed[k] < CFG.anchorSpeed)) continue;
+        if (!(dDraw[k] <= dRunMin + CFG.anchorNear) || !(speed[k] < aSpeed)) continue;
         var stable = true;
-        for (var q = k; q <= Math.min(run.e, k + holdN); q++) if (isNum(speed[q]) && speed[q] >= CFG.anchorHoldSpeed) { stable = false; break; }
+        for (var q = k; q <= run.e && t[q] - t[k] <= CFG.anchorHoldSec + 0.5 * bs; q++) if (isNum(speed[q]) && speed[q] >= hSpeed) { stable = false; break; }
         if (stable) anchor = k;
       }
-      if (anchor < 0) for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear && speed[k] < CFG.anchorHoldSpeed) { anchor = k; break; }
+      if (anchor < 0) for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear && speed[k] < hSpeed) { anchor = k; break; }
       if (anchor < 0) for (k = run.s; k <= run.e; k++) if (dDraw[k] <= dRunMin + CFG.anchorNear) { anchor = k; break; }
       if (anchor < 0) return { ok: false, code: 'no-full-draw' };
+      // v1.2：位置による補正。遅いドローの最後は引き手がごくゆっくりアンカーへ近づくため、検出ノイズがあると速さでは
+      //   保持と区別できず、アンカー到達が早まる（5 秒のドロー・σ=0.005 で最大 1.8 秒）。ドローは的の側（+u）から近づくので、
+      //   顔に対する引き手首の位置が保持中の位置（中央値）より明らかに的の側にあるフレームは、まだドローの途中とみなして進める。
+      //   許容幅は max(anchorPosTol, 保持中の位置のばらつき（四分位範囲／1.35）× 3)。クリープや揺れの欠点があってもばらつきが
+      //   広がるだけなので、アンカー到達を遅らせない
+      var us = [];
+      for (k = anchor; k <= run.e; k++) if (relS[k]) us.push(relS[k].u);
+      if (us.length >= 5) {
+        var uRef = median(us), uTol = Math.max(CFG.anchorPosTol, 3 * (quantile(us, 0.75) - quantile(us, 0.25)) / 1.349);
+        var a1 = anchor;
+        while (a1 < run.e && (!relS[a1] || relS[a1].u > uRef + uTol)) a1++;
+        if (a1 < run.e && relS[a1]) anchor = a1;
+      }
+
+      // v1.2：アンカー到達が映っているか。クリップの最初（前の射の区間の後）からアンカー到達までに、顔に対する引き手首が
+      //   anchorSeenDisp 以上動いていなければ、クリップがフルドローの途中から始まったとみなす（エイミング時間などは下限値になる）
+      var dispMax = 0;
+      if (rel[anchor]) for (k = ws0; k < anchor; k++) if (rel[k]) dispMax = Math.max(dispMax, bdist(rel[k], rel[anchor]));
+      var anchorSeen = dispMax >= CFG.anchorSeenDisp;
 
       var aimD = median(dDraw.slice(anchor, run.e + 1));
-      var scanEnd = Math.min(n - 1, run.e + Math.round(0.6 / dt));
+      var scanEnd = Math.max(run.e, Math.min(n - 1, idxNear(t, t[run.e] + 0.6)));
       var release = -1, method = null;
       for (k = anchor + 1; k <= scanEnd; k++) {
-        var p0 = S.wD[k - 1], p1 = S.wD[k];
+        // 速さは baseSec 前のフレームからの移動で測る（15fps では v1.1 と同じ 1 フレーム差。releaseFwdMax も baseSec あたりの量）
+        var kb = Math.max(anchor, backIdx(t, k, bs));
+        var p0 = S.wD[kb], p1 = S.wD[k];
         if (!p0 || !p1) continue;
         var du2 = p1.u - p0.u, dv2 = p1.v - p0.v;
-        var v2 = hyp(du2, dv2) / (t[k] - t[k - 1]);
-        if (v2 >= CFG.releaseSpeed && dDraw[k] > dDraw[k - 1] && du2 < CFG.releaseFwdMax) {
-          var j = Math.min(k + 1, n - 1);
-          if (j === k || dDraw[j] > aimD + CFG.releaseAway) { release = k - 1; method = 'speed'; break; }
+        var v2 = hyp(du2, dv2) / (t[k] - t[kb]);
+        if (v2 >= CFG.releaseSpeed && dDraw[k] > dDraw[kb] && du2 < CFG.releaseFwdMax) {
+          // 最小持続時間：その後 releaseHoldSec のあいだ、頭部基準点から離れたままであること
+          var held = true, seen = 0;
+          for (var j = k + 1; j < n && t[j] - t[k] <= CFG.releaseHoldSec + 0.25 * bs; j++) {
+            if (!isNum(dDraw[j])) continue;
+            seen++;
+            if (!(dDraw[j] > aimD + CFG.releaseAway)) { held = false; break; }
+          }
+          if (held && (seen > 0 || k === n - 1)) { release = k - 1; method = 'speed'; break; }
         }
       }
       if (release < 0) {
@@ -1002,9 +1539,8 @@ var ArcheryLogic = (function () {
         }
       }
       if (release < 0) return { ok: false, code: 'no-release' };
-      // 動きが 2 フレームにまたがる場合に備え、動き始める直前の静止フレームまで遡る
-      while (release - 1 > anchor && S.wD[release] && S.wD[release - 1] &&
-        bdist(S.wD[release], S.wD[release - 1]) / (t[release] - t[release - 1]) >= CFG.releaseOnset) release--;
+      // 動きが 2 フレームにまたがる場合に備え、動き始める直前の静止フレームまで遡る（速さは baseSec 前のフレームから）
+      while (release - 1 > anchor && isNum(wristSpeed(t, S, release)) && wristSpeed(t, S, release) >= CFG.releaseOnset) release--;
       if (release < anchor) release = anchor;
 
       // 遡ってセットアップ（弓手首の上昇）→ ドローイング開始（両手首間距離の伸び始め）を探す
@@ -1033,14 +1569,90 @@ var ArcheryLogic = (function () {
       }
       var endT = t[n - 1];
       var followEnd = idxNear(t, Math.min(endT, t[release] + 1.0));
+      var sub = refineRelease(t, S, release);
       return {
         ok: true,
         setupStart: setupStart, setupPeak: setupPeak, drawStart: drawStart,
         anchor: anchor, release: release, followEnd: followEnd,
-        releaseMethod: method,
+        releaseMethod: method, anchorSeen: anchorSeen, anchorSpeedThr: aSpeed,
+        releaseT: sub ? sub.t : t[release],
+        releasePeakT: sub ? sub.peakT : null,
+        releasePeakSpeed: sub ? sub.peakSpeed : null,
+        runEnd: run.e,
         followAvail: endT - t[release]
       };
     }
+  }
+
+  /* ---------- 4b. フェーズ検出の確信度（0〜1） ----------
+   * 材料（IMPROVE.md §2）：
+   *   anchor  … アンカー区間（アンカー到達〜リリース）の両手首間距離（span）の安定度
+   *   release … リリース速度ピークの明瞭さ（ピーク速度 ÷ エイミング中の速度の 90% 点）。距離による代替検出なら半分
+   *   valid   … 対象の射の区間の有効フレーム率（補間したフレームは 0.5 と数える）
+   * 総合値は 3 つの幾何平均（どれか 1 つが 0 なら 0）。
+   * アンカー到達・リリースの瞬間が欠損（未検出・補間）に重なる場合、その時刻は欠損の長さの分だけ不確かなので、
+   * anchor・release をそれぞれ欠損の長さに応じて下げる（リリースの速度ピークは欠損の中では観測できない） */
+  function gapAt(t, B, idxs) {
+    // v1.2：弓手首が欠けたフレームも欠損として数える（v1.1 の valid 判定と同じ）
+    var n = t.length, bad = function (k) { return k < 0 || k >= n || !B.valid[k] || B.interp[k] || (B.bowMissing && B.bowMissing[k]); };
+    var lo = Infinity, hi = -Infinity;
+    idxs.forEach(function (k) { if (k >= 0 && k < n && bad(k)) { lo = Math.min(lo, k); hi = Math.max(hi, k); } });
+    if (hi < lo) return 0;
+    while (lo - 1 >= 0 && bad(lo - 1)) lo--;
+    while (hi + 1 < n && bad(hi + 1)) hi++;
+    var a = lo - 1 >= 0 ? t[lo - 1] : t[lo], b = hi + 1 < n ? t[hi + 1] : t[hi];
+    return Math.max(0, b - a - frameDt(t));
+  }
+  function phaseConfidence(t, B, ph, i0, i1) {
+    var S = B.S, a0 = ph.anchor, r = ph.release, k;
+    // アンカーの判定は ±2 フレームの速度を使うため、欠損の直後 2〜3 フレームはアンカーと判定できない → a0−3〜a0 を見る
+    // （v1.2：15fps 換算の実時間 3·baseSec 前まで）
+    var gapA = gapAt(t, B, within(t, a0, -3 * CFG.baseSec, 0)), gapR = gapAt(t, B, [r, r + 1]);
+    var span = [];
+    for (k = a0; k <= r; k++) if (S.wB[k] && S.wD[k]) span.push(bdist(S.wB[k], S.wD[k]));
+    var spread = span.length >= 3 ? quantile(span, 0.9) - quantile(span, 0.1) : NaN;
+    var cA = isNum(spread) ? clamp(1 - spread / CFG.confSpanTol, 0, 1) : 0.5;
+    // v1.2：アンカー区間のうち弓手首が見えず両手首の間隔を確かめられないフレームの割合だけ、span の安定度の裏付けが弱い
+    var spanMissFrac = 1 - span.length / Math.max(1, r - a0 + 1);
+    if (isNum(spread) && spanMissFrac > 0) cA *= 1 - 0.5 * spanMissFrac;
+    cA *= clamp(1 - gapA / CFG.confGapAnchorSec, 0, 1);
+    // v1.2：アンカー到達が映っていない（クリップがフルドローの途中から始まる）場合、アンカー時刻は「クリップの始まり」でしかない
+    if (ph.anchorSeen === false) cA *= CFG.confAnchorCut;
+
+    var aimSp = [];
+    for (k = a0 + 1; k <= r; k++) aimSp.push(wristSpeed(t, S, k));
+    var base = Math.max(quantile(aimSp, 0.9), 0.02);
+    var snr = isNum(ph.releasePeakSpeed) ? ph.releasePeakSpeed / base : NaN;
+    var cR = isNum(snr) ? clamp((snr - CFG.confSnrLo) / (CFG.confSnrHi - CFG.confSnrLo), 0, 1) : 0;
+    if (ph.releaseMethod !== 'speed') cR *= 0.5;
+    cR *= clamp(1 - gapR / CFG.confGapRelSec, 0, 1);
+
+    // 有効フレーム率。補間フレームは 0.5 と数える。v1.2：弓手首が欠けたフレームは v1.1 と同じく無効（0）、
+    // 「可視度の低い点を含むフレーム」は lowVisWeight（0.75）と数える（重なる場合は小さい方）
+    var nV = 0, nI = 0, nBm = 0, nLv = 0, N = 0, wsum = 0;
+    for (k = i0; k <= i1; k++) {
+      N++;
+      if (!B.valid[k]) continue;
+      if (B.bowMissing && B.bowMissing[k]) { nBm++; continue; }
+      nV++;
+      var wgt = 1;
+      if (B.interp[k]) { nI++; wgt = Math.min(wgt, 0.5); }
+      if (B.lowVis && B.lowVis[k]) { nLv++; wgt = Math.min(wgt, CFG.lowVisWeight); }
+      wsum += wgt;
+    }
+    var validRate = N ? nV / N : 0, interpRate = N ? nI / N : 0;
+    var eff = N ? wsum / N : 0;
+    var cV = clamp((eff - CFG.confValidLo) / (CFG.confValidHi - CFG.confValidLo), 0, 1);
+
+    var value = Math.cbrt(cA * cR * cV);
+    return {
+      value: value, low: value < CFG.lowConfidence,
+      parts: { anchor: cA, release: cR, valid: cV },
+      detail: {
+        spanSpread: spread, peakSpeed: ph.releasePeakSpeed, aimSpeedQ90: base, snr: snr, validRate: validRate, interpRate: interpRate, frames: N, gapAtAnchorSec: gapA, gapAtReleaseSec: gapR,
+        bowMissingRate: N ? nBm / N : 0, lowVisRate: N ? nLv / N : 0, anchorSeen: ph.anchorSeen !== false, spanUnverified: !!ph.spanUnverified
+      }
+    };
   }
 
   /* ---------- 5. カメラ揺れの推定（research.md §5） ---------- */
@@ -1215,85 +1827,116 @@ var ArcheryLogic = (function () {
     'ears': '頭が横を向いて両耳が重なって見えるため、耳のラインの角度を安定して測れません。',
     'no-motion': 'リリース直後に引き手がほとんど動いておらず、方向の比率を計算できません（引き手のフォロースルーを参照）。'
   };
+  /* v1.2：参考値にした理由（全指標リストに表示する） */
+  var REF_TEXT = {
+    noise: { above: '目安を超えていますが、目安との差が測定ノイズの約 2 倍に満たないため、判定せず参考値としています。', below: '目安内ですが、目安との差が測定ノイズの約 2 倍に満たないため、判定せず参考値としています。' },
+    partial: { below: '動画がフルドローの途中から始まり、アンカー到達が映っていないため、この値は実際より小さい可能性があります。目安内とは判定せず参考値としています。' }
+  };
+  /* エイミング区間の途中から測った値が「実際の値の下限」になる指標（アンカー到達が映っていない場合） */
+  var LOWER_BOUND_IDS = { M3: true, M4: true, M5: true, M11: true };
 
   /* ---------- 7. 指標の算出 ---------- */
+  /* 指標ごとのフレーム単位の信号（体軸系列 S のフレーム i から計算）。指標の算出と、測定ノイズの推定の両方で使う */
+  function elbowHOf(S, i) {
+    // M2：弓腕ライン（BS肩→BS手首）からの引き肘の垂直距離（上が正）
+    var sB = S.sB[i], wB = S.wB[i], eD = S.eD[i];
+    if (!sB || !wB || !eD) return NaN;
+    var dx = wB.u - sB.u, dy = wB.v - sB.v, L = hyp(dx, dy);
+    if (L < 1e-6) return NaN;
+    return (eD.u - sB.u) * (dy / L) + (eD.v - sB.v) * (-dx / L);
+  }
+  function trunkAngleOf(S, i) {
+    // M9：腰中点→肩中点（原点）のラインと鉛直（腰ラインに垂直）のなす角。的の方向が正
+    if (!S.hB[i] || !S.hD[i]) return NaN;
+    var hu = (S.hB[i].u + S.hD[i].u) / 2, hv = (S.hB[i].v + S.hD[i].v) / 2;
+    return deg(Math.atan2(-hu, hv));
+  }
+  function headAngleOf(S, i) {
+    // M12：両耳ラインと肩ラインのなす角（頭が弓側に傾く方向が正）
+    var eb = S.earB[i], ed = S.earD[i], sb = S.sB[i], sd = S.sD[i];
+    if (!eb || !ed || !sb || !sd) return NaN;
+    var angS = Math.atan2(-(sb.v - sd.v), sb.u - sd.u), angE = Math.atan2(-(eb.v - ed.v), eb.u - ed.u);
+    return deg(angS - angE);
+  }
+  var SIG = {
+    M1: function (S, i) { return S.sB[i] && S.sD[i] ? S.sD[i].v - S.sB[i].v : NaN; },
+    M2: elbowHOf,
+    M3: function (S, i) { return S.wD[i] && S.H[i] ? bdist(S.wD[i], S.H[i]) : NaN; },
+    M4: function (S, i) { return S.wD[i] && S.H[i] ? S.wD[i].u - S.H[i].u : NaN; },
+    M5: function (S, i) { return S.eD[i] && S.sD[i] ? S.eD[i].v - S.sD[i].v : NaN; },
+    M6u: function (S, i) { return S.wD[i] ? S.wD[i].u : NaN; },
+    M6v: function (S, i) { return S.wD[i] ? S.wD[i].v : NaN; },
+    M7: function (S, i) { return S.wB[i] ? S.wB[i].v : NaN; },
+    M8: function (S, i) { return S.wD[i] ? S.wD[i].u : NaN; },
+    M9: trunkAngleOf,
+    M10: function (S, i) { return S.wB[i] && S.wD[i] ? S.wB[i].v - S.wD[i].v : NaN; },
+    M12: headAngleOf
+  };
+
+  /* 各指標の戻り値：{ value, at, range, frame, pathRange, extra, terms }
+   *   terms … 指標が「信号の区間平均の重み付き和」のとき、その区間と重み [[フレーム番号の配列, 重み], ...]（ノイズ推定用） */
   function computeMetrics(t, B, ph) {
-    var S = B.S, dt = B.dt, n = t.length;
+    var S = B.S, dt = B.dt, n = t.length, bs = CFG.baseSec;
     var a0 = ph.anchor, r = ph.release;
-    var aim = seq(a0, r);
+    var aim = seq(a0, isNum(ph.aimEnd) ? ph.aimEnd : r);   // エイミング系の指標の区間（欠損の中のリリースの動きを含めない）
     var out = {};
     function na(code) { return { na: code }; }
     function at(i) { return isNum(t[i]) ? t[i] : null; }
-    function avgAround(arr, idxs, fn) { return mean(idxs.filter(function (k) { return k >= 0 && k < n && arr[k]; }).map(function (k) { return fn(arr[k], k); })); }
+    function pick(idxs, id) { return idxs.filter(function (k) { return k >= 0 && k < n && isNum(SIG[id](S, k)); }); }
+    function avg(idxs, id) { return mean(idxs.map(function (k) { return SIG[id](S, k); })); }
     var edgeN = Math.max(1, Math.round(CFG.aimEdgeSec / dt));
     if (aim.length < 2 * edgeN) edgeN = Math.max(1, Math.floor(aim.length / 2));
     var head = aim.slice(0, edgeN), tail = aim.slice(aim.length - edgeN);
     var aimRange = [at(a0), at(r)];
 
+    // フルドロー期間の平均をとる指標（M1・M2・M9・M12）：最も外れたフレームを「動画の何秒あたりか」に使う
+    function aimMean(id, worst) {
+      var idx = pick(aim, id), best = -Infinity, bi = a0;
+      idx.forEach(function (i) { var w = worst(SIG[id](S, i)); if (w > best) { best = w; bi = i; } });
+      return idx.length ? { value: avg(idx, id), at: at(bi), range: aimRange, frame: bi, terms: [[idx, 1]] } : null;
+    }
+
     // M1 弓肩の上がり：raise = (y_DS肩 − y_BS肩) / W をフルドロー期間で平均
-    (function () {
-      var vals = [], best = -Infinity, bi = a0;
-      aim.forEach(function (i) {
-        if (!S.sB[i] || !S.sD[i]) return;
-        var x = S.sD[i].v - S.sB[i].v;
-        vals.push(x);
-        if (x > best) { best = x; bi = i; }
-      });
-      out.M1 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
-    })();
+    out.M1 = aimMean('M1', function (x) { return x; }) || na('missing');
 
     // M2 引き肘のライン：弓腕ライン（BS肩→BS手首）からの引き肘の垂直距離（上が正）
-    function elbowH(i) {
-      var sB = S.sB[i], wB = S.wB[i], eD = S.eD[i];
-      if (!sB || !wB || !eD) return NaN;
-      var dx = wB.u - sB.u, dy = wB.v - sB.v, L = hyp(dx, dy);
-      if (L < 1e-6) return NaN;
-      return (eD.u - sB.u) * (dy / L) + (eD.v - sB.v) * (-dx / L);
-    }
-    (function () {
-      var vals = [], best = -1, bi = a0;
-      aim.forEach(function (i) {
-        var h = elbowH(i);
-        if (!isNum(h)) return;
-        vals.push(h);
-        if (Math.abs(h - 0.04) > best) { best = Math.abs(h - 0.04); bi = i; }
-      });
-      out.M2 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
-    })();
+    out.M2 = aimMean('M2', function (h) { return Math.abs(h - 0.04); }) || na('missing');
 
-    // M3 アンカーの安定性：引き手首〜頭部基準点の距離の範囲（0.3 秒移動平均後）
+    // M3 アンカーの安定性：引き手首〜頭部基準点の距離の範囲（移動平均後）
     (function () {
-      var d = aim.map(function (i) { return S.wD[i] && S.H[i] ? bdist(S.wD[i], S.H[i]) : NaN; });
+      var d = aim.map(function (i) { return SIG.M3(S, i); });
       if (nums(d).length < CFG.minAimFrames) { out.M3 = na(aim.length < CFG.minAimFrames ? 'short-aim' : 'missing'); return; }
-      var half = Math.max(1, Math.round(CFG.aimSmoothSec / 2 / dt));
+      var half = CFG.aimSmoothSec > 0 ? Math.max(1, Math.round(CFG.aimSmoothSec / 2 / dt)) : 0;
       var sm = d.map(function (_, k) { return mean(d.slice(Math.max(0, k - half), k + half + 1)); });
       var vals = nums(sm), mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals), md = median(vals);
       var bi = a0, best = -1;
       sm.forEach(function (x, k) { if (isNum(x) && Math.abs(x - md) > best) { best = Math.abs(x - md); bi = aim[k]; } });
-      out.M3 = { value: mx - mn, at: at(bi), range: aimRange, frame: bi, extra: { mean: md } };
+      out.M3 = { value: mx - mn, at: at(bi), range: aimRange, frame: bi, extra: { mean: md }, maHalf: half, frames: pick(aim, 'M3') };
     })();
 
     // M4 クリーピング：アンカー到達時から的の方向への引き手首の移動（頭部基準点に対する相対位置）
     (function () {
       if (aim.length < CFG.minAimFrames) { out.M4 = na('short-aim'); return; }
-      var f = function (p, k) { return S.H[k] ? p.u - S.H[k].u : NaN; };
-      var c0 = avgAround(S.wD, head, f), c1 = avgAround(S.wD, tail, f);
-      out.M4 = isNum(c0) && isNum(c1) ? { value: c1 - c0, at: at(r), range: aimRange, frame: r, pathRange: [a0, r] } : na('missing');
+      var h = pick(head, 'M4'), tl = pick(tail, 'M4');
+      out.M4 = h.length && tl.length ? { value: avg(tl, 'M4') - avg(h, 'M4'), at: at(r), range: aimRange, frame: r, pathRange: [a0, r], terms: [[tl, 1], [h, -1]] } : na('missing');
     })();
 
     // M5 コラプシング：肩を基準にした引き肘の高さの低下量
     (function () {
       if (aim.length < CFG.minAimFrames) { out.M5 = na('short-aim'); return; }
-      var f = function (p, k) { return S.sD[k] ? p.v - S.sD[k].v : NaN; };
-      var y0 = avgAround(S.eD, head, f), y1 = avgAround(S.eD, tail, f);
-      out.M5 = isNum(y0) && isNum(y1) ? { value: y1 - y0, at: at(r), range: aimRange, frame: r, pathRange: [a0, r] } : na('missing');
+      var h = pick(head, 'M5'), tl = pick(tail, 'M5');
+      out.M5 = h.length && tl.length ? { value: avg(tl, 'M5') - avg(h, 'M5'), at: at(r), range: aimRange, frame: r, pathRange: [a0, r], terms: [[tl, 1], [h, -1]] } : na('missing');
     })();
 
     var endT = t[n - 1];
+    // v1.2：「リリース○秒後」はサブフレームのリリース時刻（releaseT）から数える。v1.1 はリリース直前のフレーム t[r] から
+    //   数えていたため、検出ノイズでそのフレームが 1〜2 フレーム前後すると、0.5 秒後の時点もずれ、手がまだ動いている
+    //   場合（引き手が戻ってくるバウンスなど）に M8 が 0.04 W 変わって「目安内」と誤って出ることがあった
+    var tRel = isNum(ph.releaseT) && ph.releaseT >= t[r] && ph.releaseT <= t[r] + 3 * CFG.baseSec ? ph.releaseT : t[r];
     function afterIdx(sec) {
-      if (endT - t[r] < sec - CFG.followTol) return -1;
-      var k = idxNear(t, t[r] + sec);
-      return Math.abs(t[k] - (t[r] + sec)) <= CFG.followTol + 1e-9 ? k : -1;
+      if (endT - tRel < sec - CFG.followTol) return -1;
+      var k = idxNear(t, tRel + sec);
+      return Math.abs(t[k] - (tRel + sec)) <= CFG.followTol + 1e-9 ? k : -1;
     }
 
     // M6 プラッキング：リリース直後 0.3 秒の引き手首の変位を後方成分と外側成分に分解
@@ -1308,55 +1951,52 @@ var ArcheryLogic = (function () {
       var back = -(du * ax + dv * ay);
       var outward = Math.abs(du * -ay + dv * ax);
       var ex = { back: back, out: outward };
+      var base = { at: at(r), range: [at(r), at(k)], frame: r, pathRange: [r, k], extra: ex, disp: [r, k] };
       if (back < CFG.pluckMinBack) {
         if (outward < CFG.pluckMinOut) { out.M6 = na('no-motion'); return; }
-        out.M6 = { value: CFG.pluckRatioCap, capped: true, at: at(r), range: [at(r), at(k)], frame: r, pathRange: [r, k], extra: ex };
+        out.M6 = Object.assign({ value: CFG.pluckRatioCap, capped: true }, base);
         return;
       }
-      var ratio = Math.min(outward / back, CFG.pluckRatioCap);
-      out.M6 = { value: ratio, at: at(r), range: [at(r), at(k)], frame: r, pathRange: [r, k], extra: ex };
+      out.M6 = Object.assign({ value: Math.min(outward / back, CFG.pluckRatioCap) }, base);
     })();
 
     // M7 弓腕の残身：リリース時点と 0.5 秒後の弓手首の高さの差（下がりが正）
     var k5 = afterIdx(CFG.followSec);
+    // v1.2：0.5 秒後の時点での信号の傾き（W/秒）。時点のずれ（フレームへの丸め・リリース時刻の誤差）による値の不確かさを
+    //   測定ノイズに加えるために使う（estimateNoise）
+    function slopeAt(id, k) {
+      var w = within(t, k, -bs, bs), a = w[0], b = w[w.length - 1];
+      if (w.length < 2) return NaN;
+      var xa = SIG[id](S, a), xb = SIG[id](S, b);
+      return isNum(xa) && isNum(xb) && t[b] > t[a] ? (xb - xa) / (t[b] - t[a]) : NaN;
+    }
     (function () {
       if (k5 < 0) { out.M7 = na('no-follow'); return; }
-      var f = function (p) { return p.v; };
-      var y0 = avgAround(S.wB, [r - 1, r], f), y1 = avgAround(S.wB, [k5 - 1, k5, k5 + 1], f);
-      out.M7 = isNum(y0) && isNum(y1) ? { value: y1 - y0, at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5] } : na('missing');
+      // v1.2：平均をとるフレームは実時間（15fps 換算で r−1〜r、k5−1〜k5+1）
+      var i0 = pick(within(t, r, -bs, 0), 'M7'), i1 = pick(within(t, k5, -bs, bs), 'M7');
+      out.M7 = i0.length && i1.length ? { value: avg(i1, 'M7') - avg(i0, 'M7'), at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5], terms: [[i1, 1], [i0, -1]], timeSlope: slopeAt('M7', k5) } : na('missing');
     })();
 
     // M8 引き手のフォロースルー：アンカー位置から的と逆方向への変位（0.5 秒後）
     (function () {
       if (k5 < 0) { out.M8 = na('no-follow'); return; }
-      var u0 = avgAround(S.wD, tail, function (p) { return p.u; });
-      var u1 = avgAround(S.wD, [k5 - 1, k5, k5 + 1], function (p) { return p.u; });
-      if (!isNum(u0) || !isNum(u1)) { out.M8 = na('missing'); return; }
+      var i0 = pick(tail, 'M8'), i1 = pick(within(t, k5, -bs, bs), 'M8');
+      if (!i0.length || !i1.length) { out.M8 = na('missing'); return; }
       var dh = S.wD[k5] && S.H[k5] ? bdist(S.wD[k5], S.H[k5]) : NaN;
-      out.M8 = { value: -(u1 - u0), at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5], extra: { headDist: dh } };
+      out.M8 = { value: -(avg(i1, 'M8') - avg(i0, 'M8')), at: at(k5), range: [at(r), at(k5)], frame: k5, pathRange: [r, k5], extra: { headDist: dh }, terms: [[i1, -1], [i0, 1]], timeSlope: slopeAt('M8', k5) };
     })();
 
     // M9 体幹の傾き：腰中点→肩中点のラインと鉛直（腰ラインに垂直）のなす角。的の方向が正
-    (function () {
-      var vals = [], best = -1, bi = a0;
-      aim.forEach(function (i) {
-        if (!S.hB[i] || !S.hD[i]) return;
-        var hu = (S.hB[i].u + S.hD[i].u) / 2, hv = (S.hB[i].v + S.hD[i].v) / 2;
-        var a = deg(Math.atan2(-hu, hv));
-        vals.push(a);
-        if (Math.abs(a) > best) { best = Math.abs(a); bi = i; }
-      });
-      out.M9 = vals.length ? { value: mean(vals), at: at(bi), range: aimRange, frame: bi } : na('missing');
-    })();
+    out.M9 = aimMean('M9', function (a) { return Math.abs(a); }) || na('missing');
 
     // M10 セットアップの両手の連動：弓手首が肩の高さに達した時点の両手首の高さの差
     (function () {
       var p = ph.setupPeak;
       if (p < 0) { out.M10 = na('no-setup'); return; }
-      var idx = [p - 1, p, p + 1].filter(function (k) { return k >= 0 && k < n && S.wB[k] && S.wD[k]; });
+      var idx = pick(within(t, p, -bs, bs), 'M10');
       if (!idx.length) { out.M10 = na('missing'); return; }
-      var v = mean(idx.map(function (k) { return Math.abs(S.wB[k].v - S.wD[k].v); }));
-      out.M10 = { value: v, at: at(p), range: [at(p), at(p)], frame: p };
+      var v = mean(idx.map(function (k) { return Math.abs(SIG.M10(S, k)); }));
+      out.M10 = { value: v, at: at(p), range: [at(p), at(p)], frame: p, terms: [[idx, 1]] };
     })();
 
     // M11 エイミング時間
@@ -1364,33 +2004,112 @@ var ArcheryLogic = (function () {
 
     // M12 頭の傾き：両耳ラインと肩ラインのなす角（頭が弓側に傾く方向が正）
     (function () {
-      var sep = [], vals = [], best = -1, bi = a0;
-      aim.forEach(function (i) {
-        var eb = S.earB[i], ed = S.earD[i], sb = S.sB[i], sd = S.sD[i];
-        if (!eb || !ed || !sb || !sd) return;
-        var Eu = eb.u - ed.u, Ev = eb.v - ed.v;
-        sep.push(Eu);
-        var angS = Math.atan2(-(sb.v - sd.v), sb.u - sd.u), angE = Math.atan2(-Ev, Eu);
-        var a = deg(angS - angE);
-        vals.push(a);
-        if (Math.abs(a) > best) { best = Math.abs(a); bi = i; }
-      });
-      if (!vals.length) { out.M12 = na('missing'); return; }
+      var idx = pick(aim, 'M12');
+      if (!idx.length) { out.M12 = na('missing'); return; }
+      var sep = idx.map(function (i) { return S.earB[i].u - S.earD[i].u; });
       var ms = median(sep);
       if (!(ms >= CFG.earMinSep)) { out.M12 = na('ears'); out.M12.extra = { sep: ms }; return; }
-      out.M12 = { value: mean(vals), at: at(bi), range: aimRange, frame: bi, extra: { sep: ms } };
+      var m = aimMean('M12', function (a) { return Math.abs(a); });
+      m.extra = { sep: ms };
+      out.M12 = m;
     })();
 
     return out;
   }
 
+  /* ---------- 7b. 指標ごとの測定ノイズ（IMPROVE.md §3） ----------
+   * 1) ジッタ量：生の体軸系列（平滑化前）から指標の信号をフレームごとに計算し、エイミング区間で
+   *    4 階の残差（2 次残差の 2 次残差。等間隔なら (1,−4,6,−4,1)/4）を求める。中央値ベース（MAD）で外れ値に強くし、
+   *    白色ノイズを仮定して 1 フレームあたりの標準偏差 σ に換算する（残差の標準偏差 = σ·√70／4）。
+   *    直線的な動き（エクスパンション・クリープ・ずれ）に加え、ゆっくりした揺れ（3 次までの多項式で近似できる動き。
+   *    例：1 Hz 前後のアンカーの揺れ）も残差にほとんど入らないので、実際の動きをノイズと取り違えにくい
+   *    （v1.1 初期実装の二階差分では、1.2 Hz の揺れの曲率をノイズと見なしてノイズを過大に見積もっていた）。
+   * 2) 伝播：指標が平滑化後の信号の重み付き和なら、その重みを平滑化フィルタの転置に通してノイズ利得を計算する（noiseGain）。
+   *    M3（範囲）は移動平均後の 1 点のノイズ × √2（2 点の差）、M6（比）は変位のノイズを線形化して換算する。
+   *    M11（時間）はアンカー・リリースそれぞれ 1 フレームの時刻の不確かさ（√2 フレーム）とする。
+   * 限界：実際の MediaPipe の出力は時間方向に相関したノイズを含む（VIDEO モードの内部平滑化など）。
+   *       白色ノイズの仮定はその場合ノイズを小さめに見積もる。実データでの較正はエクスポート JSON で行う。 */
+  function jitterOf(t, Braw, fn, i0, i1) {
+    var res = d4Residuals(t, Braw, fn, i0, i1, []);
+    if (res.length < CFG.noiseMinSamples) return NaN;
+    return median(res) / 0.6745 / D4_SCALE;
+  }
+
+  function estimateNoise(t, Braw, sch, ph, raw) {
+    var n = t.length, a0 = ph.anchor, r = isNum(ph.aimEnd) ? ph.aimEnd : ph.release, out = {}, sig = {};
+    function jit(id) { if (!(id in sig)) sig[id] = jitterOf(t, Braw, SIG[id], a0, r); return sig[id]; }
+    function gainOf(terms) {
+      var c = [];
+      for (var i = 0; i < n; i++) c.push(0);
+      terms.forEach(function (tm) { tm[0].forEach(function (k) { c[k] += tm[1] / tm[0].length; }); });
+      return noiseGain(sch, c);
+    }
+    DEFS.forEach(function (d) {
+      var m = raw[d.id], id = d.id, nz = NaN, s = NaN;
+      if (!m || m.na) { out[id] = { noise: NaN, jitter: NaN }; return; }
+      if (m.terms) {
+        s = jit(id);
+        nz = s * gainOf(m.terms);
+      } else if (id === 'M3') {
+        s = jit('M3');
+        var mid0 = a0 + Math.floor((r - a0) / 2), h = m.maHalf, idx = [];
+        for (var k = Math.max(a0, mid0 - h); k <= Math.min(r, mid0 + h); k++) idx.push(k);
+        nz = Math.SQRT2 * s * gainOf([[idx, 1]]);
+      } else if (id === 'M6') {
+        var su = jit('M6u'), sv = jit('M6v');
+        s = Math.sqrt((su * su + sv * sv) / 2);
+        var sd = s * gainOf([[[m.disp[1]], 1], [[m.disp[0]], -1]]);
+        var back = Math.max(m.extra.back, CFG.pluckMinBack), ratio = m.value;
+        nz = sd * Math.sqrt(1 + ratio * ratio) / back;
+      } else if (id === 'M11') {
+        s = frameDt(t);
+        nz = Math.SQRT2 * s;
+      }
+      // 水平の基準の推定誤差（buildBody の refSigma）：向きに依存する指標だけに加える。
+      //   M1 … 両肩の横方向の間隔 × 角度誤差、M10 … 両手首の横方向の間隔 × 角度誤差、M9 … 角度誤差そのもの（度）
+      //   M2・M12 は同じフレーム内の 2 本の線の関係、M3〜M8 は時間差なので、一定の角度誤差は打ち消される
+      var ref = isNum(Braw.refSigma) ? Braw.refSigma : 0, extra = 0;
+      if (ref > 0 && isNum(nz) && m.terms) {
+        var fr = m.terms[0][0];
+        if (id === 'M1') extra = ref * Math.abs(mean(fr.map(function (k) { return Braw.S.sB[k] && Braw.S.sD[k] ? Braw.S.sB[k].u - Braw.S.sD[k].u : NaN; })));
+        else if (id === 'M10') extra = ref * Math.abs(mean(fr.map(function (k) { return Braw.S.wB[k] && Braw.S.wD[k] ? Braw.S.wB[k].u - Braw.S.wD[k].u : NaN; })));
+        else if (id === 'M9') extra = deg(ref);
+        if (isNum(extra) && extra > 0) nz = Math.sqrt(nz * nz + extra * extra);
+      }
+      // v1.2：「リリース 0.5 秒後」の時点の不確かさ（M7・M8）。手がまだ動いている時点では、時点が σt ずれると値が
+      //   傾き × σt 変わる。σt はフレームへの丸め（Δt／√12）とリリース時刻の推定誤差（約 0.25 フレーム）の合成
+      var timePart = 0;
+      if (isNum(nz) && isNum(m.timeSlope)) {
+        var fdt = frameDt(t), st = Math.sqrt(fdt * fdt / 12 + Math.pow(CFG.followTimeErrFrames * fdt, 2));
+        timePart = Math.abs(m.timeSlope) * st;
+        nz = Math.sqrt(nz * nz + timePart * timePart);
+      }
+      out[id] = { noise: nz, jitter: s, refPart: extra || 0, timePart: timePart };
+    });
+    return out;
+  }
+
   /* ---------- 8. ルール評価・表示用テキスト ---------- */
-  function evaluate(def, raw) {
+  /* 信頼性グレード：ノイズ ÷ 指標のスケール（閾値の幅）で 高／中／低。補間・無効フレームが多い場合と、
+   * フェーズ検出の確信度が低い場合は下げる。ノイズを推定できない場合は「低」 */
+  function reliabilityOf(def, noise, ctx) {
+    if (!isNum(noise)) return { key: 'low', label: '低', ratio: null };
+    var ratio = noise / def.scale;
+    var lv = ratio <= CFG.relHigh ? 2 : ratio <= CFG.relMid ? 1 : 0;
+    if (ctx && ctx.badFrac > CFG.relInterpMax) lv--;
+    if (ctx && ctx.lowConfidence) lv = Math.min(lv, 1);
+    lv = Math.max(0, lv);
+    return { key: ['low', 'mid', 'high'][lv], label: ['低', '中', '高'][lv], ratio: ratio };
+  }
+
+  /* nz = { noise, jitter }（estimateNoise）、ctx = { badFrac, lowConfidence } */
+  function evaluate(def, raw, nz, ctx) {
     var m = {
       id: def.id, name: def.name, phase: def.phase, def: def,
-      status: 'na', value: null, variant: null, score: 0, closeness: Infinity,
+      status: 'na', value: null, variant: null, score: 0, closeness: Infinity, exceed: 0, margin: null, refSide: null, refReason: null, refText: null,
       at: null, range: null, frame: -1, pathRange: null, extra: raw ? raw.extra || null : null,
-      valueText: '', thresholdText: '', detailText: '', naReason: null, gauge: null
+      valueText: '', thresholdText: '', detailText: '', naReason: null, gauge: null,
+      noise: null, jitter: null, reliability: null, noiseText: ''
     };
     if (!raw || raw.na) {
       m.naReason = raw ? raw.na : 'missing';
@@ -1400,36 +2119,60 @@ var ArcheryLogic = (function () {
     }
     var x = raw.value;
     m.value = x; m.at = raw.at; m.range = raw.range; m.frame = raw.frame; m.pathRange = raw.pathRange || null;
-    var exceed = 0, close = 0;
+    // exceed … 閾値を超えた量（0 なら目安内）、margin … 目安内のときの閾値までの余裕（符号つき偏差 = exceed − margin）
+    var exceed = 0, margin = 0, close = 0;
     switch (def.id) {
       case 'M2':
         if (x < def.lo) { exceed = def.lo - x; m.variant = 'low'; }
         else if (x > def.hi) { exceed = x - def.hi; m.variant = 'high'; }
+        margin = Math.min(x - def.lo, def.hi - x);
         close = x < 0.04 ? (0.04 - x) / 0.09 : (x - 0.04) / 0.11;
         break;
       case 'M8':
         exceed = Math.max(0, def.thr - x);
+        margin = x - def.thr;
         close = x >= 0.2 ? 0 : (0.2 - x) / 0.18;
         break;
       case 'M9':
         exceed = Math.max(0, Math.abs(x) - def.thr);
+        margin = def.thr - Math.abs(x);
         m.variant = x >= 0 ? 'toward' : 'away';
         close = Math.abs(x) / def.thr;
         break;
       case 'M11':
         exceed = Math.max(0, x - def.thr);
+        margin = def.thr - x;
         close = Math.abs(x - 2) / (x < 2 ? 1 : 3);
         break;
       case 'M12':
         exceed = Math.max(0, Math.abs(x) - def.thr);
+        margin = def.thr - Math.abs(x);
         m.variant = x >= 0 ? 'bow' : 'draw';
         close = Math.abs(x) / def.thr;
         break;
       default:
         exceed = Math.max(0, x - def.thr);
+        margin = def.thr - x;
         close = Math.abs(x) / def.thr;
     }
-    m.status = exceed > 0 ? 'flag' : 'ok';
+    var noise = nz && isNum(nz.noise) ? nz.noise : NaN;
+    m.noise = isNum(noise) ? noise : null;
+    m.jitter = nz && isNum(nz.jitter) ? nz.jitter : null;
+    m.reliability = reliabilityOf(def, noise, ctx);
+    m.exceed = exceed;
+    m.margin = exceed > 0 ? 0 : margin;
+    // 閾値からの偏差が測定ノイズの約 2 倍に満たなければ、指摘にも「目安内」にもせず「参考値」とする（全指標リストにだけ出す）。
+    //   超えた側（refSide 'above'）：わずかに超えたが、ノイズで超えた可能性を否定できない → 指摘にしない（IMPROVE.md §3）
+    //   下回った側（refSide 'below'）：目安内だが、ノイズで下回っただけの可能性を否定できない → 「目安内」と言い切らない
+    var gate = isNum(noise) && noise > 0 ? CFG.noiseGateK * noise : 0;
+    if (exceed > 0) m.status = exceed < gate ? 'ref' : 'flag';
+    else m.status = margin < gate ? 'ref' : 'ok';
+    m.refSide = m.status === 'ref' ? (exceed > 0 ? 'above' : 'below') : null;
+    m.refReason = m.status === 'ref' ? 'noise' : null;
+    // v1.2：アンカー到達が映っていない場合、エイミングの途中から測った M3・M4・M5・M11 は実際の値の下限。
+    //   目安を超えていれば（下限でも超えているので）そのまま判定するが、目安内とは言い切れないので参考値にする
+    if (ctx && ctx.lowerBound && m.status === 'ok') { m.status = 'ref'; m.refSide = 'below'; m.refReason = 'partial'; }
+    m.refText = m.status === 'ref' ? REF_TEXT[m.refReason][m.refSide] : null;
     m.score = exceed > 0 ? def.weight * exceed / def.scale : 0;
     m.closeness = close;
     describe(m, raw);
@@ -1464,7 +2207,7 @@ var ArcheryLogic = (function () {
         break;
       case 'M3':
         m.valueText = fx(x); m.unitText = '肩幅比（' + cm(x) + ' の変動）';
-        m.detailText = 'エイミング中の引き手首と顔（鼻・口）との距離の変動幅（検出ノイズを抑えるため 0.5 秒の移動平均後）。';
+        m.detailText = 'エイミング中の引き手首と顔（鼻・口）との距離の変動幅（最大−最小。静止に近い区間を強く平滑化した系列で測定）。';
         m.gauge = { lo: 0, hi: 0.12, okLo: 0, okHi: 0.04 };
         break;
       case 'M4':
@@ -1514,17 +2257,45 @@ var ArcheryLogic = (function () {
         break;
     }
     if (m.gauge) m.gauge.value = m.gauge.abs ? Math.abs(x) : x;
+    m.noiseText = noiseText(def, m.noise);
+  }
+
+  function noiseText(def, nz) {
+    if (!isNum(nz)) return '推定できず';
+    switch (def.id) {
+      case 'M9': case 'M12': return '±' + nz.toFixed(1) + '°';
+      case 'M11': return '±' + nz.toFixed(2) + '秒';
+      case 'M6': return '±' + nz.toFixed(2);
+      default: return '±' + nz.toFixed(3);
+    }
   }
 
   /* ---------- 9. 優先度づけ・良かった点・総合コメント ---------- */
-  function adviceCard(m, shakeHigh) {
-    var def = m.def;
+  var NOTE_SHAKE = 'カメラの揺れが大きく、この指標は参考値です';
+  var NOTE_LOWCONF = 'フェーズ検出の確信度が低いため参考値です';
+  var NOTE_LOWREL = 'この指標は測定の信頼性が低いため、参考値としてご覧ください';
+
+  /* 確信度が低いときの見出し：断定を弱める（「〜ようです」「〜傾向があります」→「〜可能性があります」） */
+  function hedge(title) {
+    var m = title.match(/^(.*?)(（[^（）]*）)?$/), body = m[1], tail = m[2] || '';
+    if (body.indexOf('可能性') >= 0) return title;
+    if (/ようです$/.test(body)) body = body.replace(/ようです$/, '可能性があります');
+    else if (/があります$/.test(body)) body = body.replace(/があります$/, 'がある可能性があります');
+    else if (/です$/.test(body)) body = body.replace(/です$/, 'の可能性があります');
+    return body + tail;
+  }
+
+  function adviceCard(m, shakeHigh, lowConf) {
+    var def = m.def, notes = [], kinds = [];
+    if (shakeHigh) { notes.push(NOTE_SHAKE); kinds.push('shake'); }
+    if (lowConf) { notes.push(NOTE_LOWCONF); kinds.push('confidence'); }
+    if (m.reliability && m.reliability.key === 'low') { notes.push(NOTE_LOWREL); kinds.push('reliability'); }
     return {
       id: m.id, name: def.name, phase: def.phase,
-      title: def.title(m),
-      evidence: { value: m.valueText, unit: m.unitText, threshold: m.thresholdText, detail: m.detailText, at: m.at, range: m.range, gauge: m.gauge },
+      title: lowConf ? hedge(def.title(m)) : def.title(m),
+      evidence: { value: m.valueText, unit: m.unitText, threshold: m.thresholdText, detail: m.detailText, at: m.at, range: m.range, gauge: m.gauge, noise: m.noise, noiseText: m.noiseText, reliability: m.reliability },
       cue: def.cue, drills: def.drills.slice(), checkpoint: def.checkpoint, why: def.why, source: def.source,
-      note: shakeHigh ? 'カメラの揺れが大きく、この指標は参考値です' : null,
+      note: notes.length ? notes.join('。') : null, notes: notes, noteKinds: kinds, tentative: !!lowConf,
       score: m.score, joints: def.joints.slice(), guide: def.guide, frame: m.frame, pathRange: m.pathRange
     };
   }
@@ -1532,22 +2303,36 @@ var ArcheryLogic = (function () {
   function pickGood(metrics) {
     var cands = metrics.filter(function (m) { return m.status === 'ok' && isNum(m.closeness); });
     if (!cands.length) return null;
+    // 信頼性「低」の指標は、ほかに候補があれば選ばない（ノイズで偶然よく見えている可能性があるため）
+    var solid = cands.filter(function (m) { return !m.reliability || m.reliability.key !== 'low'; });
+    if (solid.length) cands = solid;
     cands.sort(function (a, b) { return a.closeness - b.closeness || DEFS.indexOf(a.def) - DEFS.indexOf(b.def); });
     var m = cands[0];
     var text = m.def.good;
     if (m.id === 'M11') text = 'エイミング時間が ' + m.value.toFixed(1) + ' 秒で、NTS の目安（1〜3 秒）に近い長さです。';
-    return { id: m.id, name: m.name, phase: m.phase, text: text, value: m.valueText, unit: m.unitText, threshold: m.thresholdText, at: m.at, frame: m.frame, pathRange: m.pathRange, joints: m.def.joints.slice(), guide: m.def.guide };
+    return { id: m.id, name: m.name, phase: m.phase, text: text, value: m.valueText, unit: m.unitText, threshold: m.thresholdText, at: m.at, frame: m.frame, pathRange: m.pathRange, joints: m.def.joints.slice(), guide: m.def.guide, reliability: m.reliability };
   }
 
-  function summarize(metrics, flagged, good) {
+  function summarize(metrics, flagged, good, lowConf) {
     var measured = metrics.filter(function (m) { return m.status !== 'na'; }).length;
     var naN = metrics.length - measured;
+    var refs = metrics.filter(function (m) { return m.status === 'ref'; });
     var tailNa = naN ? '（' + naN + '項目は撮影条件により測定できませんでした）' : '';
+    // v1.2：参考値の理由ごとに書き分ける（ノイズの範囲内／動画がフルドローの途中から始まり、映っている範囲だけで測った値）
+    var names = function (l) { return l.map(function (m) { return '「' + m.name + '」'; }).join(''); };
+    var rn = refs.filter(function (m) { return m.refReason !== 'partial'; }), rp = refs.filter(function (m) { return m.refReason === 'partial'; });
+    var partialTxt = rp.length ? names(rp) + 'は動画がフルドローの途中から始まり、映っている範囲だけで測った値のため参考値です。' : '';
     if (!flagged.length) {
-      return '測定できた' + measured + '項目は、すべて目安の範囲に収まりました' + tailNa + '。' +
-        (good ? '特に「' + good.name + '」は理想に近い値です。' : '');
+      var first = '測定できた' + measured + '項目' + (refs.length ? 'に、目安をはっきり超えた項目はありませんでした' : 'は、すべて目安の範囲に収まりました') + tailNa + '。';
+      if (lowConf) return first + 'ただし、' + NOTE_LOWCONF + '。' + partialTxt;
+      if (refs.length) return first + (rn.length ? names(rn) + 'は目安との差が測定ノイズの範囲内のため参考値です。' : '') + partialTxt;
+      return first + (good ? '特に「' + good.name + '」は理想に近い値です。' : '');
     }
     var top = flagged[0];
+    if (lowConf) {
+      return '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超えた可能性があります' + tailNa + '。' +
+        '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）ですが、フェーズ検出の確信度が低いため参考値です。';
+    }
     return '測定できた' + measured + '項目のうち' + flagged.length + '項目が目安を超えました' + tailNa + '。' +
       '差が最も大きいのは「' + top.name + '」（' + top.valueText + '、' + top.thresholdText + '）で、まずはここから見直すのがおすすめです。';
   }
@@ -1557,8 +2342,21 @@ var ArcheryLogic = (function () {
     'no-person': { title: '射手の骨格を十分に検出できませんでした', message: '人物の骨格を検出できたフレームが少なすぎるため、フェーズを判定できません。' },
     'no-full-draw': { title: 'フルドロー（アンカー）を検出できませんでした', message: '引き手が顔に付き、両手が大きく開いた状態（フルドロー）が見つかりませんでした。' },
     'no-release': { title: 'リリースを検出できませんでした', message: 'フルドローは見つかりましたが、その後のリリースの動きが見つかりませんでした。' },
-    'letdown': { title: '完全な1射が見つかりませんでした', message: 'フルドローの後、リリースせずに引き戻した（レットダウン）と判定されました。' }
+    'letdown': { title: '完全な1射が見つかりませんでした', message: 'フルドローの後、リリースせずに引き戻した（レットダウン）と判定されました。' },
+    'arm-missing': { title: '腕が画面の外に出ている時間が長すぎます', message: '片方の手首を検出できないフレームが多く、フルドローとリリースを判定できませんでした。弓を持つ手の先まで画面に入るように、少し引いて撮影してください。' }
   };
+
+  /* エイミング区間の最後の有効フレーム。リリースが欠損（関節を検出できないフレーム）の中で起きた場合、
+   * 検出されるリリースは欠損明けの直前になるので、そこまでをエイミングとすると欠損中のリリースの動きが
+   * エイミングの平滑化・指標に混ざる。エイミングは欠損の手前の有効フレームで終える */
+  function aimEndOf(Braw, ph) {
+    var k = ph.release;
+    // （v1.2 で「サブフレームのリリース時刻より後のフレームを除く」規則を試したが、検出ノイズで releaseT が ph.release より
+    //   10〜45ms 手前に出ることがあり、区切りが動いてリリースの検出が 1 フレーム早まる循環が起きたため採用していない。
+    //   可変間隔の入力でリリース直前のフレームに動き始めの一部が入る弱点は build-result-3.json に残す）
+    while (k > ph.anchor && !Braw.valid[k]) k--;
+    return k;
+  }
 
   /* ---------- 10. エントリポイント ---------- */
   function analyze(frames, opts) {
@@ -1577,34 +2375,105 @@ var ArcheryLogic = (function () {
     base.detectedFrames = core;
     if (core < Math.max(8, n * 0.4)) return fail('no-person');
 
+    // v1.2：片方の手首が多くのフレームで欠けていて検出に失敗した場合は、原因（腕が画面外）を伝える
+    function failPh(code) {
+      var miss15 = 0, miss16 = 0, have = 0;
+      P.forEach(function (p) { if (!p || !p[11] || !p[12]) return; have++; if (!p[15]) miss15++; if (!p[16]) miss16++; });
+      if (have && Math.max(miss15, miss16) / have >= CFG.armMissingFrac) return fail('arm-missing');
+      return fail(code);
+    }
     var sides = detectSides(P, opts.handedness);
-    if (!sides) return fail('no-full-draw');
+    if (!sides) return failPh('no-full-draw');
     var R = rolesFor(sides.hand);
     var o = orient(P, sides, R);
-    base.hand = sides.hand; base.handSource = sides.source; base.autoHand = sides.autoHand;
+    base.hand = sides.hand; base.handSource = sides.source; base.autoHand = sides.autoHand; base.handFallback = !!sides.fallback;
     base.targetSide = sides.dir > 0 ? 'right' : 'left';
     base.roles = { B: R.B, D: R.D };
     base.flips = o.flips;
 
-    var B = buildBody(t, o.Q, R);
+    // 生の体軸系列（平滑化前）：平滑化の強さ（カットオフ列）の決定と、測定ノイズの推定に使う
+    var Braw = buildBody(t, o.Q, R, { raw: true });
+    // 2 段階：(1) 区切りなしで平滑化してフェーズを検出 → (2) 検出したリリースの動き始めで区切って平滑化し直し、再検出
+    var sch = smoothSchedule(t, Braw);
+    var B = buildBody(t, smoothLandmarks(o.Q, sch), R);
     base.rollSource = B.rollSource;
+    var nValid = 0, nInterp = 0;
+    // 有効フレーム率は v1.1 と同じ意味（主要点がすべてそろったフレーム。弓手首が欠けたフレームは含めない）
+    B.valid.forEach(function (v, k) { if (v && !B.bowMissing[k]) { nValid++; if (B.interp[k]) nInterp++; } });
+    base.quality = { validRate: n ? nValid / n : 0, interpRate: n ? nInterp / n : 0, gatedKeyPoints: prep.gated };
     var ph = detectPhases(t, B);
-    if (!ph.ok) return fail(ph.code);
+    if (!ph.ok) return failPh(ph.code);
+    // 区切り（アンカー到達・リリースの動き始め）で平滑化し直して再検出する。区切りと検出結果が一致するまで繰り返す
+    // （1 フレームでもずれると、エイミング区間の平滑化にドロー／リリースの動きが混ざって指標が偏るため）。
+    // 再検出が大きく（2 フレーム以上）ずれた場合や失敗した場合は、直前の一致した組み合わせ（または区切りなし）を使う
+    var settled = false, passes = 0;
+    while (passes < CFG.smMaxPasses) {
+      passes++;
+      var ae = aimEndOf(Braw, ph);
+      var sch2 = smoothSchedule(t, Braw, [ph.anchor, ae + 1], ph.anchor, ae + 1);
+      var B2 = buildBody(t, smoothLandmarks(o.Q, sch2), R);
+      var ph2 = detectPhases(t, B2);
+      sch = sch2; B = B2;   // この平滑化は ph の区切りで作ったもの（ph と整合している）
+      // 「1 フレーム以内」は v1.2 で実時間（15fps 換算で 1 フレーム＝1.5·baseSec 以内）にした
+      var tolT = 1.5 * CFG.baseSec;
+      if (!ph2.ok || Math.abs(t[ph2.release] - t[ph.release]) > tolT || Math.abs(t[ph2.anchor] - t[ph.anchor]) > tolT) break;
+      if (ph2.release === ph.release && ph2.anchor === ph.anchor) { settled = true; ph = ph2; break; }
+      ph = ph2;
+      sch = null;           // ph が動いたので、次の周回でその区切りに合わせて作り直す
+    }
+    if (!sch) {
+      // 繰り返しの上限に達した（±1 フレームで行き来する）場合：最後の検出結果の区切りで平滑化し、そのフェーズを採用する
+      var ae2 = aimEndOf(Braw, ph);
+      sch = smoothSchedule(t, Braw, [ph.anchor, ae2 + 1], ph.anchor, ae2 + 1);
+      B = buildBody(t, smoothLandmarks(o.Q, sch), R);
+    }
+    ph.aimEnd = aimEndOf(Braw, ph);
+    if (!settled) {
+      // サブフレームのリリース時刻は、最終的に採用した体軸系列で求め直す
+      var sub0 = refineRelease(t, B.S, ph.release);
+      ph.releaseT = sub0 ? sub0.t : t[ph.release];
+      ph.releasePeakT = sub0 ? sub0.peakT : null;
+      ph.releasePeakSpeed = sub0 ? sub0.peakSpeed : null;
+    }
 
     var i0 = ph.setupStart >= 0 ? ph.setupStart : ph.drawStart >= 0 ? ph.drawStart : Math.max(0, idxNear(t, t[ph.anchor] - 2));
     var shake = estimateShake(t, o.Q, R, B, i0, ph.followEnd);
+    var conf = phaseConfidence(t, B, ph, i0, ph.followEnd);
+    conf.detail.smoothingPasses = passes;
+    conf.detail.smoothingSettled = settled;
     var raw = computeMetrics(t, B, ph);
-    var metrics = DEFS.map(function (d) { return evaluate(d, raw[d.id]); });
+    var nzs = estimateNoise(t, Braw, sch, ph, raw);
+    // 指標に使ったフレームのうち、補間・無効のフレームの割合（信頼性を 1 段下げる材料）。
+    // v1.2：可視度の低い点を含むフレームと、弓手首を使う指標（M2・M7・M10）では弓手首が欠けたフレームも数える
+    var USES_BOW_WRIST = { M2: true, M7: true, M10: true };
+    function badFrac(id) {
+      var m = raw[id], lo = ph.anchor, hi = ph.release, bad = 0, cnt = 0;
+      if (!m || m.na) return 0;
+      if (m.pathRange && (id === 'M6' || id === 'M7' || id === 'M8')) { lo = m.pathRange[0]; hi = m.pathRange[1]; }
+      if (id === 'M10') { var w10 = within(t, m.frame, -CFG.baseSec, CFG.baseSec); lo = w10[0]; hi = w10[w10.length - 1]; }
+      for (var k = Math.max(0, lo); k <= Math.min(n - 1, hi); k++) {
+        cnt++;
+        if (!B.valid[k] || B.interp[k] || B.lowVis[k] || (USES_BOW_WRIST[id] && B.bowMissing[k])) bad++;
+      }
+      return cnt ? bad / cnt : 0;
+    }
+    var metrics = DEFS.map(function (d) {
+      return evaluate(d, raw[d.id], nzs[d.id], { badFrac: badFrac(d.id), lowConfidence: conf.low, lowerBound: ph.anchorSeen === false && !!LOWER_BOUND_IDS[d.id] });
+    });
     var flagged = metrics.filter(function (m) { return m.status === 'flag'; })
       .sort(function (a, b) { return b.score - a.score || DEFS.indexOf(a.def) - DEFS.indexOf(b.def); });
-    var findings = flagged.slice(0, 3).map(function (m) { return adviceCard(m, shake.high); });
+    var findings = flagged.slice(0, 3).map(function (m) { return adviceCard(m, shake.high, conf.low); });
     var good = pickGood(metrics);
 
     function P_(i) { return i >= 0 ? { i: i, t: t[i] } : null; }
     var phases = {
       setupStart: P_(ph.setupStart), setupPeak: P_(ph.setupPeak), drawStart: P_(ph.drawStart),
       anchor: P_(ph.anchor), release: P_(ph.release), followEnd: P_(ph.followEnd),
-      releaseMethod: ph.releaseMethod, aimSec: t[ph.release] - t[ph.anchor], followAvailSec: ph.followAvail
+      releaseMethod: ph.releaseMethod, aimSec: t[ph.release] - t[ph.anchor], followAvailSec: ph.followAvail,
+      // リリースの瞬間（サブフレーム）：速度ピーク（放物線補間）の半分の速さを上向きに横切る時刻
+      releaseT: ph.releaseT, releasePeakT: ph.releasePeakT, releasePeakSpeed: ph.releasePeakSpeed,
+      confidence: conf.value, confidenceParts: conf.parts, lowConfidence: conf.low,
+      anchorSeen: ph.anchorSeen !== false, spanUnverified: !!ph.spanUnverified
     };
     var segs = [];
     var tFirst = t[0], tLast = t[n - 1];
@@ -1620,21 +2489,118 @@ var ArcheryLogic = (function () {
     base.phases = phases;
     base.segments = segs;
     base.shake = shake;
+    base.confidence = conf;
+    base.lowConfidence = conf.low;
+    base.quality.shotValidRate = conf.detail.validRate;
+    base.quality.shotInterpRate = conf.detail.interpRate;
+    base.quality.shotBowMissingRate = conf.detail.bowMissingRate;
+    base.quality.shotLowVisRate = conf.detail.lowVisRate;
+    base.quality.visibility = prep.vis;
+    // v1.2：入力条件による劣化の案内（結果画面の帯に出す）
+    var notes = [];
+    if (ph.anchorSeen === false) notes.push({ kind: 'partial', text: '動画がフルドローの途中から始まっているため、アンカー到達の瞬間が映っていません。エイミング時間・アンカーの安定性・クリーピング・コラプシングは映っている範囲だけで測った値（実際より小さい可能性）です。' });
+    if (prep.vis.adapted) notes.push({ kind: 'lowvis', text: '逆光などで骨格の検出の確からしさ（可視度）が全体に低い動画です（中央値 ' + Math.round(prep.vis.median * 100) + '%）。判定の基準を下げて解析したため、確信度と各指標の信頼性を下げています。' });
+    if (conf.detail.bowMissingRate > 0.05 || ph.spanUnverified) notes.push({ kind: 'arm', text: '弓を持つ腕の先が画面の外に出たり隠れたりしたフレームがあります（対象の射の ' + Math.round(conf.detail.bowMissingRate * 100) + '%）。弓手首を使う項目（引き肘のライン・弓腕の残身・セットアップの連動）は、見えているフレームだけで測るか「測定できず」にしています。' });
+    base.inputNotes = notes;
     base.metrics = metrics.map(function (m) {
       return {
         id: m.id, name: m.name, phase: m.phase, status: m.status, value: m.value, variant: m.variant,
-        score: m.score, closeness: m.closeness, at: m.at, range: m.range, frame: m.frame, pathRange: m.pathRange,
+        score: m.score, closeness: m.closeness, exceed: m.exceed, margin: m.margin, refSide: m.refSide, refReason: m.refReason, refText: m.refText, at: m.at, range: m.range, frame: m.frame, pathRange: m.pathRange,
         valueText: m.valueText, unitText: m.unitText || '', thresholdText: m.thresholdText, detailText: m.detailText,
         naReason: m.naReason, naText: m.naText || null, gauge: m.gauge, extra: m.extra,
+        noise: m.noise, jitter: m.jitter, noiseText: m.noiseText, reliability: m.reliability,
         joints: m.def.joints.slice(), guide: m.def.guide
       };
     });
     base.findings = findings;
     base.flaggedCount = flagged.length;
+    base.refCount = metrics.filter(function (m) { return m.status === 'ref'; }).length;
     base.good = good;
-    base.summary = summarize(metrics, flagged, good);
+    base.summary = summarize(metrics, flagged, good, conf.low);
     base.skippedShots = ph.skipped || [];
+    base.series = seriesOf(t, Braw, B, sch);
     return base;
+  }
+
+  /* ---------- 11. 解析データ（閾値チューニング用） ---------- */
+  var SERIES_KEYS = ['sB', 'sD', 'eB', 'eD', 'wB', 'wD', 'hB', 'hD', 'H', 'earB', 'earD'];
+  function r4(x) { return isNum(x) ? Math.round(x * 1e4) / 1e4 : null; }
+  function seriesOf(t, Braw, B, sch) {
+    function pack(S) {
+      var o = {};
+      SERIES_KEYS.forEach(function (k) {
+        o[k] = { u: S[k].map(function (p) { return p ? r4(p.u) : null; }), v: S[k].map(function (p) { return p ? r4(p.v) : null; }) };
+      });
+      return o;
+    }
+    return {
+      t: t.map(r4), valid: B.valid.slice(), interp: B.interp.slice(),
+      cutoffHz: sch.fc.map(function (x) { return Math.round(x * 100) / 100; }),
+      smoothed: pack(B.S), raw: pack(Braw.S)
+    };
+  }
+
+  /* 解析結果 → エクスポート用のプレーンなオブジェクト（JSON.stringify してダウンロードする）。
+   * 個人情報・動画・画像は含めない（体軸系の座標と、解析の設定・結果の数値だけ）。meta = { width, height } */
+  function exportData(a, meta) {
+    if (!a || !a.ok) return null;
+    meta = meta || {};
+    var thresholds = {};
+    DEFS.forEach(function (d) {
+      thresholds[d.id] = d.id === 'M2' ? { lo: d.lo, hi: d.hi, scale: d.scale, weight: d.weight } : { thr: d.thr, scale: d.scale, weight: d.weight, direction: d.id === 'M8' ? 'below' : (d.id === 'M9' || d.id === 'M12') ? 'abs-above' : 'above' };
+    });
+    var cfg = {};
+    Object.keys(CFG).forEach(function (k) { cfg[k] = Array.isArray(CFG[k]) ? CFG[k].slice() : CFG[k]; });
+    function ph(p) { return p ? { frame: p.i, t: r4(p.t) } : null; }
+    var P = a.phases;
+    return {
+      format: 'archery-form-analysis',
+      formatVersion: 1,
+      app: { name: '射形チェック', version: VERSION },
+      units: { length: '肩幅 W（両肩間の距離＝1）', angle: '度', time: '秒', axes: '体軸系：原点＝肩中点、u＝的の方向が正、v＝下向きが正' },
+      input: {
+        frameCount: a.frameCount, detectedFrames: a.detectedFrames, fps: r4(1 / frameDt(a.times)),
+        tStart: r4(a.times[0]), tEnd: r4(a.times[a.times.length - 1]),
+        width: isNum(meta.width) ? meta.width : null, height: isNum(meta.height) ? meta.height : null,
+        hand: a.hand, handSource: a.handSource, autoHand: a.autoHand, handFallback: !!a.handFallback, targetSide: a.targetSide, rollSource: a.rollSource,
+        keyPointVis: a.quality.visibility ? { median: r4(a.quality.visibility.median), keyGate: r4(a.quality.visibility.keyGate), adapted: a.quality.visibility.adapted } : null
+      },
+      thresholds: thresholds,
+      config: cfg,
+      phases: {
+        setupStart: ph(P.setupStart), setupPeak: ph(P.setupPeak), drawStart: ph(P.drawStart),
+        anchor: ph(P.anchor), release: ph(P.release), followEnd: ph(P.followEnd),
+        releaseT: r4(P.releaseT), releasePeakT: r4(P.releasePeakT), releasePeakSpeed: r4(P.releasePeakSpeed),
+        releaseMethod: P.releaseMethod, aimSec: r4(P.aimSec),
+        confidence: r4(a.confidence.value), lowConfidence: a.confidence.low,
+        confidenceParts: { anchor: r4(a.confidence.parts.anchor), release: r4(a.confidence.parts.release), valid: r4(a.confidence.parts.valid) },
+        confidenceDetail: {
+          spanSpread: r4(a.confidence.detail.spanSpread), snr: r4(a.confidence.detail.snr), aimSpeedQ90: r4(a.confidence.detail.aimSpeedQ90),
+          validRate: r4(a.confidence.detail.validRate), interpRate: r4(a.confidence.detail.interpRate), frames: a.confidence.detail.frames,
+          gapAtAnchorSec: r4(a.confidence.detail.gapAtAnchorSec), gapAtReleaseSec: r4(a.confidence.detail.gapAtReleaseSec),
+          smoothingPasses: a.confidence.detail.smoothingPasses, smoothingSettled: a.confidence.detail.smoothingSettled,
+          bowMissingRate: r4(a.confidence.detail.bowMissingRate), lowVisRate: r4(a.confidence.detail.lowVisRate),
+          anchorSeen: a.confidence.detail.anchorSeen, spanUnverified: a.confidence.detail.spanUnverified
+        }
+      },
+      quality: {
+        validFrameRate: r4(a.quality.validRate), interpolatedFrameRate: r4(a.quality.interpRate),
+        shotValidFrameRate: r4(a.quality.shotValidRate), shotInterpolatedFrameRate: r4(a.quality.shotInterpRate),
+        gatedKeyPoints: a.quality.gatedKeyPoints,
+        shake: { rms: r4(a.shake.rms), high: a.shake.high, threshold: a.shake.threshold }
+      },
+      metrics: a.metrics.map(function (m) {
+        return {
+          id: m.id, name: m.name, status: m.status, refSide: m.refSide, refReason: m.refReason, value: r4(m.value), variant: m.variant, exceed: r4(m.exceed), margin: r4(m.margin), score: r4(m.score),
+          noise: r4(m.noise), jitterPerFrame: r4(m.jitter), reliability: m.reliability ? m.reliability.key : null,
+          at: r4(m.at), frame: m.frame, naReason: m.naReason
+        };
+      }),
+      inputNotes: (a.inputNotes || []).map(function (x) { return x.kind; }),
+      findings: a.findings.map(function (f) { return f.id; }),
+      good: a.good ? a.good.id : null,
+      series: a.series
+    };
   }
 
   /* 表示用：解析フレーム i における役割（'B.s' など）の元ランドマーク番号 */
@@ -1649,9 +2615,14 @@ var ArcheryLogic = (function () {
 
   return {
     VERSION: VERSION, CFG: CFG, DEFS: DEFS, SWAP: SWAP,
-    analyze: analyze, rawIndex: rawIndex,
+    analyze: analyze, rawIndex: rawIndex, exportData: exportData,
     // テスト用に内部関数も公開（いずれも純関数）
-    _internal: { prepare: prepare, fillGaps: fillGaps, detectSides: detectSides, orient: orient, buildBody: buildBody, detectPhases: detectPhases, estimateShake: estimateShake, computeMetrics: computeMetrics, evaluate: evaluate, rolesFor: rolesFor, headRefImg: headRefImg }
+    _internal: {
+      prepare: prepare, fillGaps: fillGaps, detectSides: detectSides, orient: orient, buildBody: buildBody, detectPhases: detectPhases,
+      estimateShake: estimateShake, computeMetrics: computeMetrics, evaluate: evaluate, rolesFor: rolesFor, headRefImg: headRefImg,
+      smoothSchedule: smoothSchedule, smoothSeries: smoothSeries, smoothLandmarks: smoothLandmarks, noiseGain: noiseGain,
+      phaseConfidence: phaseConfidence, estimateNoise: estimateNoise, refineRelease: refineRelease, findRunsHyst: findRunsHyst, hedge: hedge
+    }
   };
 })();
 //LOGIC-END
@@ -2237,15 +3208,25 @@ var ArcheryLogic = (function () {
     var measured = a.metrics.filter(function (m) { return m.status !== 'na'; }).length;
     byId('res-chips').innerHTML = [
       '<span class="chip acc">' + icon('person') + (a.hand === 'left' ? '左利き' : '右利き') + (a.handSource === 'auto' ? '（自動判定）' : '') + '</span>',
-      '<span class="chip">' + icon('clock') + 'エイミング ' + a.phases.aimSec.toFixed(1) + '秒</span>',
+      '<span class="chip">' + icon('clock') + 'エイミング ' + a.phases.aimSec.toFixed(1) + '秒' + (a.phases.anchorSeen === false ? '以上' : '') + '</span>',
       '<span class="chip">' + icon('ruler') + '測定 ' + measured + '/' + a.metrics.length + '項目</span>',
-      '<span class="chip">' + icon('target') + '対象の射 ' + (a.phases.setupStart || a.phases.drawStart || a.phases.anchor).t.toFixed(1) + '〜' + a.phases.release.t.toFixed(1) + '秒</span>'
+      '<span class="chip">' + icon('target') + '対象の射 ' + (a.phases.setupStart || a.phases.drawStart || a.phases.anchor).t.toFixed(1) + '〜' + a.phases.release.t.toFixed(1) + '秒</span>',
+      '<span class="chip' + (a.lowConfidence ? '' : ' acc') + '">' + icon(a.lowConfidence ? 'alert' : 'check') + 'フェーズ検出の確信度 ' + confPct(a.phases.confidence) + '</span>'
     ].join('');
 
     var banner = '';
-    if (a.shake && a.shake.high) {
-      banner = '<div class="banner warn" style="margin-top:12px">' + icon('shake') + '<div><b>カメラの揺れが大きめです</b>（推定 ' + a.shake.rms.toFixed(3) + '、目安 ' + a.shake.threshold.toFixed(2) + ' 以下）。各指標は体の軸を基準にした相対値ですが、揺れが大きい場合は参考値としてご覧ください。</div></div>';
+    if (a.lowConfidence) {
+      banner += '<div class="banner warn" style="margin-top:12px">' + icon('alert') + '<div><b>フェーズ検出の確信度が低いため参考値です</b>（確信度 ' + confPct(a.phases.confidence) + '、目安 50% 以上）。' +
+        esc(confReasons(a)) + '各指摘は断定せず「可能性があります」と表示しています。</div></div>';
     }
+    if (a.shake && a.shake.high) {
+      banner += '<div class="banner warn" style="margin-top:12px">' + icon('shake') + '<div><b>カメラの揺れが大きめです</b>（推定 ' + a.shake.rms.toFixed(3) + '、目安 ' + a.shake.threshold.toFixed(2) + ' 以下）。各指標は体の軸を基準にした相対値ですが、揺れが大きい場合は参考値としてご覧ください。</div></div>';
+    }
+    // v1.2：入力条件（途中から始まる動画・逆光・弓腕が画面外）による劣化の案内
+    var NOTE_KIND_ICON = { partial: 'clock', lowvis: 'info', arm: 'alert' };
+    (a.inputNotes || []).forEach(function (n) {
+      banner += '<div class="banner info" style="margin-top:12px">' + icon(NOTE_KIND_ICON[n.kind] || 'info') + '<div>' + esc(n.text) + '</div></div>';
+    });
     if (a.skippedShots && a.skippedShots.length) {
       banner += '<div class="banner info" style="margin-top:12px">' + icon('info') + '<div>' + a.skippedShots.map(function (s) { return s.t0.toFixed(1) + '秒付近のフルドロー'; }).join('、') + 'はリリースまで確認できなかったため、次の射を対象にしました。</div></div>';
     }
@@ -2254,7 +3235,10 @@ var ArcheryLogic = (function () {
     // findings
     var fh = '';
     if (!a.findings.length) {
-      fh = '<div class="card empty"><div class="empty-ic">' + icon('check-circle', 'lg') + '</div><h3>目安を超えた項目はありませんでした</h3><p>測定できた項目はすべて目安の範囲内です。下の「すべての測定値」で各数値を確認できます。</p></div>';
+      var refs = a.metrics.filter(function (m) { return m.status === 'ref'; });
+      fh = '<div class="card empty"><div class="empty-ic">' + icon('check-circle', 'lg') + '</div><h3>' + (refs.length ? '目安をはっきり超えた項目はありませんでした' : '目安を超えた項目はありませんでした') + '</h3><p>' +
+        (refs.length ? esc(refs.map(function (m) { return '「' + m.name + '」'; }).join('')) + (refs.every(function (m) { return m.refReason === 'partial'; }) ? 'は動画に映っている範囲だけで測った値のため、判定せず参考値としています。' : 'は目安との差が測定ノイズの範囲内か、動画に映っている範囲だけで測った値のため、判定せず参考値としています。') : '測定できた項目はすべて目安の範囲内です。') +
+        '下の「すべての測定値」で各数値を確認できます。</p></div>';
     } else {
       fh = a.findings.map(function (f, idx) { return findingHTML(f, idx); }).join('');
     }
@@ -2274,11 +3258,18 @@ var ArcheryLogic = (function () {
 
     // all metrics
     byId('mlist').innerHTML = a.metrics.map(function (m) {
-      var pill = m.status === 'flag' ? '<span class="pill flag">要チェック</span>' : m.status === 'ok' ? '<span class="pill ok">目安内</span>' : '<span class="pill na">測定できず</span>';
+      var pill = m.status === 'flag' ? '<span class="pill flag">要チェック</span>' : m.status === 'ok' ? '<span class="pill ok">目安内</span>' :
+        m.status === 'ref' ? '<span class="pill ref">参考値</span>' : '<span class="pill na">測定できず</span>';
       var body = m.status === 'na' ? esc(m.naText) : '算出値 ' + esc(m.valueText) + ' ' + esc(m.unitText) + '／' + esc(m.thresholdText);
+      if (m.status !== 'na') {
+        body += '<span class="m-meta">' + relHTML(m.reliability) + ' 測定ノイズ ' + esc(m.noiseText) + '</span>';
+        if (m.status === 'ref') body += '<span class="m-meta">' + esc(m.refText || ((m.refSide === 'above' ? '目安を超えていますが、' : '目安内ですが、') + '目安との差が測定ノイズの約 2 倍に満たないため、判定せず参考値としています。')) + '</span>';
+      }
       return '<div class="mrow"><div class="m-name"><small>' + esc(m.id) + '</small>' + esc(m.name) + '</div>' + pill + '<div class="m-val">' + body + '</div></div>';
     }).join('');
     byId('all-metrics').open = false;
+    var refN = a.refCount || 0;
+    byId('data-meta').textContent = '有効フレーム ' + Math.round(a.quality.validRate * 100) + '%・フェーズ検出の確信度 ' + confPct(a.phases.confidence) + (refN ? '・参考値 ' + refN + '項目' : '');
 
     setupResultPlayer(a);
   }
@@ -2297,13 +3288,63 @@ var ArcheryLogic = (function () {
       '<div class="ev-main"><span class="ev-val num">' + esc(ev.value) + '</span><span class="ev-unit">' + esc(ev.unit) + '</span></div>' +
       '<div class="ev-thr">' + esc(ev.threshold) + '</div>' +
       gaugeHTML(ev.gauge) +
-      '<div class="ev-detail">' + esc(ev.detail) + '</div>' + jump + '</div>' +
-      (f.note ? '<div class="note-shake">' + icon('shake') + esc(f.note) + '</div>' : '') +
+      '<div class="ev-detail">' + esc(ev.detail) + '</div>' +
+      (ev.reliability ? '<div class="ev-noise">' + relHTML(ev.reliability) + '<span>測定ノイズ ' + esc(ev.noiseText) + '</span></div>' : '') + jump + '</div>' +
+      notesHTML(f) +
       '<div class="cue">' + icon('bulb') + '<div><div class="ev-label" style="color:var(--accent-ink)">意識するキュー</div><p>「' + esc(f.cue) + '」</p></div></div>' +
       '<div class="drills"><div class="ev-label">ドリル</div><ul>' + f.drills.map(function (d) { return '<li>' + icon('repeat') + '<span>' + esc(d) + '</span></li>'; }).join('') + '</ul></div>' +
       '<details class="why"><summary>' + icon('book', 'sm') + 'このチェックポイントについて' + icon('chev-down', 'sm chev') + '</summary>' +
       '<div class="why-body"><p><b>チェックポイント：</b>' + esc(f.checkpoint) + '</p><p style="margin-top:6px">' + esc(f.why) + '</p><p class="src">出典：' + esc(f.source) + '</p></div></details>' +
       '</div></article>';
+  }
+
+  var NOTE_ICON = { shake: 'shake', confidence: 'alert', reliability: 'info' };
+  function notesHTML(f) {
+    var list = f.notes || (f.note ? [f.note] : []);
+    if (!list.length) return '';
+    var kinds = f.noteKinds || [];
+    return '<div class="f-notes">' + list.map(function (n, i) { return '<div class="note-shake">' + icon(NOTE_ICON[kinds[i]] || 'info') + esc(n) + '</div>'; }).join('') + '</div>';
+  }
+  function relHTML(rel) {
+    if (!rel) return '';
+    return '<span class="rel ' + esc(rel.key) + '">信頼性 ' + esc(rel.label) + '</span>';
+  }
+  function confPct(x) { return (typeof x === 'number' && isFinite(x) ? Math.round(x * 100) : 0) + '%'; }
+  var CONF_PART = { anchor: 'アンカー区間の両手首の間隔が安定していない', release: 'リリースの速度のピークがはっきりしない', valid: '関節を検出できなかったフレームが多い' };
+  function confReasons(a) {
+    var p = a.phases.confidenceParts || {}, out = [];
+    Object.keys(CONF_PART).forEach(function (k) { if (typeof p[k] === 'number' && p[k] < 0.5) out.push(CONF_PART[k]); });
+    return out.length ? '主な理由：' + out.join('・') + '。' : '';
+  }
+
+  /* ---------- 解析データの保存（JSON。閾値チューニング用。ダウンロード方式で端末内に保存） ---------- */
+  function two(n) { return (n < 10 ? '0' : '') + n; }
+  function exportFileName(d) {
+    return 'archery-analysis-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + two(d.getSeconds()) + '.json';
+  }
+  function exportJSON() {
+    var a = state.analysis;
+    if (!a || !a.ok) { toast('保存できる解析結果がありません'); return null; }
+    var data = ArcheryLogic.exportData(a, { width: state.procW || null, height: state.procH || null });
+    data.exportedAt = new Date().toISOString();
+    var text = JSON.stringify(data);
+    var name = exportFileName(new Date());
+    try {
+      var blob = new Blob([text], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url; link.download = name; link.rel = 'noopener';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) { /* noop */ } }, 4000);
+      toast('解析データを保存しました（' + Math.round(text.length / 1024) + 'KB）');
+    } catch (e) {
+      toast('保存できませんでした');
+      return null;
+    }
+    return { name: name, size: text.length, data: data };
   }
 
   function setupResultPlayer(a) {
@@ -2378,7 +3419,8 @@ var ArcheryLogic = (function () {
     'no-person': ['頭から足先まで、全身が画面に入るように撮る', '逆光を避け、明るい場所で撮る', '射手の前後に人が重ならない位置から撮る'],
     'no-full-draw': ['射手の胸の正面（横）から撮る。後ろや斜めからだと手の位置が重なります', '弓手の先と引き肘まで画面に入れる（スマホは横向きがおすすめ）', '解析区間にフルドローが含まれているか確認する', '利き手を手動で選んでみる'],
     'no-release': ['リリース後も 1 秒以上撮り続ける', '解析区間の終わりを、リリースより後ろにする'],
-    'letdown': ['リリースまで撮影された射を含む区間を選ぶ']
+    'letdown': ['リリースまで撮影された射を含む区間を選ぶ'],
+    'arm-missing': ['少し引いて撮り、弓を持つ手の先から引き肘まで画面に入れる', 'スマホは横向きで撮る', '射手の前に物や人が重ならない位置から撮る']
   };
 
   function renderErrorScreen(title, sub, tips, detail, canBack) {
@@ -2432,6 +3474,7 @@ var ArcheryLogic = (function () {
       }
       case 'jump': jumpTo(parseFloat(el.getAttribute('data-t')), parseInt(el.getAttribute('data-idx'), 10)); break;
       case 'rv-play': toggleResultPlay(); break;
+      case 'export': exportJSON(); break;
       case 'rate': {
         state.rate = parseFloat(el.getAttribute('data-rate'));
         var rv = byId('rv'); if (rv) rv.playbackRate = state.rate;
@@ -2466,7 +3509,7 @@ var ArcheryLogic = (function () {
 
   window.ArcheryApp = {
     state: state, renderResult: renderResult, show: show, drawOverlay: drawOverlay, jumpTo: jumpTo,
-    showAnalysisError: showAnalysisError, showFatal: showFatal, pickPose: pickPose, buildTimes: buildTimes, onClick: onClick
+    showAnalysisError: showAnalysisError, showFatal: showFatal, pickPose: pickPose, buildTimes: buildTimes, onClick: onClick, exportJSON: exportJSON
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
